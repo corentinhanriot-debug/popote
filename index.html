@@ -219,6 +219,45 @@ ul.leg .pc{margin-left:auto;padding-left:10px;color:var(--gris);letter-spacing:.
 .lecture{margin:16px 0 0;font-size:14px;line-height:1.6;color:var(--gris)}
 .lecture b{color:var(--encre);font-weight:600}
 
+/* --- débrief ----------------------------------------------------- */
+.plat{padding:22px 0;border-bottom:1px solid var(--filet)}
+.verdicts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.vd{
+  flex:1 1 auto;background:none;border:1px solid var(--filet);color:var(--gris);
+  padding:9px 4px;cursor:pointer;font-family:inherit;font-weight:600;font-size:9.5px;
+  line-height:1;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+}
+.vd.on{color:var(--papier);border-color:transparent}
+.vd.v-encore.on{background:#46603F}
+.vd.v-bien.on  {background:#6E7B6A}
+.vd.v-bof.on   {background:#9C5A34}
+.vd.v-jamais.on{background:#7A3B22}
+.vd.v-non.on   {background:#8C8578}
+@media (prefers-color-scheme:dark){.vd.on{color:#101110}}
+.pourquoi{
+  width:100%;margin-top:10px;border:0;border-bottom:1px solid var(--filet);
+  border-radius:0;background:none;color:var(--encre);padding:8px 2px;
+  font-family:inherit;font-size:14px;
+}
+.pourquoi:focus{outline:0;border-bottom-color:var(--chloro)}
+.pourquoi::placeholder{color:var(--gris);opacity:.7}
+
+.semaine-arc summary .ttl{font-size:14px}
+.arc{list-style:none;margin:0;padding:0}
+.arc li{display:flex;align-items:baseline;gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--voile);font-size:14px;line-height:1.4}
+.arc li:last-child{border-bottom:0}
+.arc .v{margin-left:auto;flex:0 0 auto;font-size:9.5px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 7px;color:var(--papier);white-space:nowrap}
+@media (prefers-color-scheme:dark){.arc .v{color:#101110}}
+.arc .note{display:block;margin:4px 0 0;padding:0;background:none;font-size:13px;
+  color:var(--gris);font-style:italic}
+.vide{padding:22px 2px;font-size:14px;color:var(--gris);line-height:1.6}
+.compteurs{display:flex;gap:3px;margin-left:auto;flex:0 0 auto}
+.compteurs i{font-style:normal;font-size:9.5px;font-weight:600;letter-spacing:.06em;
+  padding:3px 6px;color:var(--papier);min-width:22px;text-align:center}
+@media (prefers-color-scheme:dark){.compteurs i{color:#101110}}
+
 /* --- titres de section ---------------------------------------- */
 .section{
   margin:34px 0 0;padding-bottom:8px;border-bottom:1px solid var(--encre);
@@ -253,7 +292,8 @@ textarea:focus{outline:0;border-color:var(--encre)}
   padding:13px 20px;cursor:pointer;margin-top:12px;
   font-family:inherit;font-weight:600;font-size:10.5px;line-height:1;letter-spacing:.18em;text-transform:uppercase;
 }
-.act.vide{background:none;color:var(--encre)}
+.act.vide,.act.vide-b{background:none;color:var(--encre)}
+.act.vide-b{margin-left:8px}
 .act.att{background:none;color:var(--terre);border-color:var(--terre)}
 .msg{margin-top:12px;font-size:12.5px;line-height:1.5;padding:11px 13px;display:none;
   border-left:2px solid var(--chloro);background:var(--voile)}
@@ -281,6 +321,11 @@ nav button{
   border-top:2px solid transparent;margin-top:-1px;
 }
 nav button.on{color:var(--encre);border-top-color:var(--chloro)}
+/* six onglets ne tiennent pas sur les écrans les plus étroits sans resserrer */
+@media (max-width:359px){
+  nav{padding-left:2px;padding-right:2px}
+  nav button{font-size:8.5px;letter-spacing:.01em;padding-left:0;padding-right:0}
+}
 
 .flash{
   position:fixed;left:20px;right:20px;bottom:calc(84px + env(safe-area-inset-bottom));
@@ -391,6 +436,26 @@ nav button.on{color:var(--encre);border-top-color:var(--chloro)}
     </svg>
   </section>
 
+  <section class="panel" id="p-debrief">
+    <div class="section">01 — La semaine écoulée</div>
+    <p class="intro">Un verdict par plat, et surtout une raison en quelques mots. C'est la raison
+      qui permet de corriger : un plat fade se répare, un ingrédient détesté condamne toute une
+      famille de recettes, une recette trop longue est une erreur d'estimation. Trente secondes,
+      pas davantage.</p>
+    <div id="debrief"></div>
+    <div id="envoi"></div>
+
+    <div class="section">02 — Historique</div>
+    <p class="intro">Les semaines archivées, la plus récente en tête. Une semaine est archivée
+      automatiquement quand tu en charges une nouvelle.</p>
+    <div id="histo"></div>
+
+    <div class="section">03 — Palmarès</div>
+    <p class="intro">Le cumul de tous tes verdicts, plat par plat. C'est ce tableau qui dit ce
+      qu'il faut refaire et ce qu'il faut oublier.</p>
+    <div id="palmares"></div>
+  </section>
+
   <section class="panel" id="p-reglages">
     <div class="section">01 — Charger la semaine</div>
     <p class="intro">Trois voies, de la plus rapide à la plus manuelle. Dans tous les cas, les
@@ -439,12 +504,13 @@ nav button.on{color:var(--encre);border-top-color:var(--chloro)}
   <button data-p="courses">Courses</button>
   <button data-p="recettes">Recettes</button>
   <button data-p="assiette">Assiette</button>
+  <button data-p="debrief">Débrief</button>
   <button data-p="reglages">Réglages</button>
 </nav>
 
 <script>
 "use strict";
-const VERSION = "2.5";
+const VERSION = "3.0";
 const RAYONS = {LEG:"Fruits & légumes",BOU:"Boucherie",POI:"Poissonnerie",
                 CRE:"Crèmerie",EPI:"Épicerie salée",SUR:"Surgelés",PAI:"Pain"};
 const ORDRE = ["LEG","BOU","POI","CRE","EPI","SUR","PAI"];
@@ -720,6 +786,8 @@ const DEFAUT = {
 let DATA = Store.get("semaine", null) || DEFAUT;
 let sel  = Store.get("sel", null);
 let coche = Store.get("coche", null) || {};
+let notes = Store.get("notes", null) || {};
+let hist  = Store.get("hist",  null) || [];
 if(!Array.isArray(sel) || sel.length !== DATA.jours.length) sel = DATA.jours.map(()=>0);
 function save(){ Store.set("sel", sel); Store.set("coche", coche); }
 
@@ -935,7 +1003,179 @@ function renderGestes(){
     + '</details>').join('');
 }
 
-function renderAll(){ renderMenu(); renderCourses(); renderRecettes(); renderGestes(); }
+/* --- débrief, historique, palmarès -------------------------------
+   Trois vues d'une même matière : ce que tu as pensé des plats.
+   Le débrief porte sur la semaine en cours, l'historique conserve
+   les semaines archivées, le palmarès cumule tout.
+
+   Tout vit dans le stockage local. Rien ne part nulle part : c'est
+   le bouton « Copier le débrief » qui referme la boucle, en te
+   donnant un bloc de texte à me transmettre le dimanche.
+   ---------------------------------------------------------------- */
+const VERDICTS = [
+  ["encore","Encore","#46603F"], ["bien","Bien","#6E7B6A"],
+  ["bof","Bof","#9C5A34"],       ["jamais","Jamais","#7A3B22"],
+  ["non","Non cuisiné","#8C8578"]
+];
+const LIB = Object.fromEntries(VERDICTS.map(v=>[v[0],v[1]]));
+const COUL = Object.fromEntries(VERDICTS.map(v=>[v[0],v[2]]));
+
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function platDuJour(i){ return DATA.jours[i].opts[sel[i]]; }
+
+/* --- la semaine en cours --------------------------------------- */
+function renderDebrief(){
+  $("debrief").innerHTML = DATA.jours.map((d,i)=>{
+    const o = platDuJour(i), e = notes[o.n] || {};
+    return '<div class="plat">'
+      + '<div class="ref"><b>Jour ' + n2(i+1) + '</b> ' + d.j + '</div>'
+      + '<p class="nom">' + esc(o.n) + '</p>'
+      + '<div class="verdicts">' + VERDICTS.map(v =>
+          `<button class="vd v-${v[0]}${e.v===v[0]?' on':''}" data-i="${i}" data-v="${v[0]}">`
+          + v[1] + '</button>').join('') + '</div>'
+      + `<input class="pourquoi" data-i="${i}" maxlength="140" `
+      + `placeholder="Pourquoi ? (facultatif)" value="${esc(e.n||'')}">`
+      + '</div>';
+  }).join('');
+
+  $("debrief").querySelectorAll('.vd').forEach(b => b.addEventListener('click', () => {
+    const o = platDuJour(+b.dataset.i);
+    const e = notes[o.n] || {};
+    e.v = (e.v === b.dataset.v) ? null : b.dataset.v;   // recliquer annule
+    if(!e.v && !e.n) delete notes[o.n]; else notes[o.n] = e;
+    Store.set("notes", notes);
+    renderDebrief(); renderPalmares();
+  }));
+
+  $("debrief").querySelectorAll('.pourquoi').forEach(inp => {
+    const enregistre = () => {
+      const o = platDuJour(+inp.dataset.i);
+      const e = notes[o.n] || {};
+      e.n = inp.value.trim();
+      if(!e.v && !e.n) delete notes[o.n]; else notes[o.n] = e;
+      Store.set("notes", notes);
+    };
+    inp.addEventListener('change', enregistre);
+    inp.addEventListener('blur', enregistre);
+  });
+
+  const remplis = DATA.jours.filter((d,i)=>(notes[platDuJour(i).n]||{}).v).length;
+  $("envoi").innerHTML =
+      `<p class="intro"><b>${remplis} plat${remplis>1?'s':''} sur ${DATA.jours.length}</b> `
+    + 'noté' + (remplis>1?'s':'') + '. Le bloc ci-dessous est ce que tu me transmets le dimanche : '
+    + 'c\'est lui qui fait que le menu suivant tient compte de cette semaine.</p>'
+    + '<div><button class="act" id="copier">Copier le débrief</button>'
+    + '<button class="act vide-b" id="versClaude">Copier et ouvrir Claude</button></div>'
+    + '<div class="msg" id="msgD"></div>';
+
+  $("copier").addEventListener('click', ()=> copierDebrief(false));
+  $("versClaude").addEventListener('click', ()=> copierDebrief(true));
+}
+
+/* --- le bloc de texte à me transmettre -------------------------- */
+function texteDebrief(){
+  let t = 'DÉBRIEF — ' + (DATA.semaine || 'semaine en cours') + '\n\n';
+  DATA.jours.forEach((d,i)=>{
+    const o = platDuJour(i), e = notes[o.n] || {};
+    t += d.j + ' — ' + o.n + ' — ' + (e.v ? LIB[e.v].toUpperCase() : 'PAS D\'AVIS') + '\n';
+    if(e.n) t += '    « ' + e.n + ' »\n';
+  });
+  return t;
+}
+
+async function copierDebrief(ouvrir){
+  const t = texteDebrief();
+  let ok = false;
+  try{ await navigator.clipboard.writeText(t); ok = true; }catch(e){}
+  const m = $("msgD");
+  if(ok){
+    m.textContent = "Débrief copié." + (ouvrir ? " Colle-le dans la conversation." : "");
+    m.className = 'msg ok';
+  }else{
+    m.innerHTML = "Copie impossible sur ce navigateur. Sélectionne et copie ce texte :"
+                + '<textarea readonly style="margin-top:10px">' + esc(t) + '</textarea>';
+    m.className = 'msg ko';
+  }
+  setTimeout(()=>{ if(ok) m.className='msg'; }, 8000);
+  if(ouvrir) window.open('https://claude.ai/new', '_blank', 'noopener');
+}
+
+/* --- l'historique ----------------------------------------------- */
+function renderHistorique(){
+  if(!hist.length){
+    $("histo").innerHTML = '<p class="vide">Aucune semaine archivée pour l\'instant. '
+      + 'La première y entrera quand tu chargeras la semaine suivante.</p>';
+    return;
+  }
+  $("histo").innerHTML = hist.map((h,i)=>{
+    const notes_ = h.p.filter(x=>x.v).length;
+    return '<details class="bloc semaine-arc"><summary>'
+      + `<span class="idx">${n2(hist.length-i)}</span>`
+      + `<span class="ttl">${esc(h.s||'Semaine')}</span></summary>`
+      + '<div class="corps"><ul class="arc">'
+      + h.p.map(x =>
+          '<li><span>' + esc(x.n)
+          + (x.note ? '<span class="note">« ' + esc(x.note) + ' »</span>' : '')
+          + '</span>'
+          + (x.v ? `<span class="v" style="background:${COUL[x.v]}">${LIB[x.v]}</span>` : '')
+          + '</li>').join('')
+      + '</ul>'
+      + `<p class="nutri">${h.d || ''} · ${notes_} plat${notes_>1?'s':''} noté${notes_>1?'s':''}</p>`
+      + '</div></details>';
+  }).join('');
+}
+
+/* --- le palmarès ------------------------------------------------ */
+function renderPalmares(){
+  const cumul = {};
+  const ajoute = (nom, v) => {
+    if(!v) return;
+    (cumul[nom] = cumul[nom] || {})[v] = (cumul[nom][v] || 0) + 1;
+  };
+  hist.forEach(h => h.p.forEach(x => ajoute(x.n, x.v)));
+  Object.keys(notes).forEach(n => ajoute(n, notes[n].v));
+
+  const noms = Object.keys(cumul);
+  if(!noms.length){
+    $("palmares").innerHTML = '<p class="vide">Rien à cumuler pour l\'instant. '
+      + 'Note tes plats de la semaine ci-dessus et le palmarès se remplira tout seul.</p>';
+    return;
+  }
+  const score = n => (cumul[n].encore||0)*3 + (cumul[n].bien||0)
+                   - (cumul[n].bof||0)*2 - (cumul[n].jamais||0)*4;
+  noms.sort((a,b)=> score(b)-score(a) || a.localeCompare(b,'fr'));
+
+  $("palmares").innerHTML = '<ul class="arc">' + noms.map(n =>
+      '<li><span>' + esc(n) + '</span><span class="compteurs">'
+    + VERDICTS.filter(v=>cumul[n][v[0]]).map(v =>
+        `<i style="background:${v[2]}" title="${v[1]}">${cumul[n][v[0]]}</i>`).join('')
+    + '</span></li>').join('') + '</ul>'
+    + '<p class="nutri">Trié du plus apprécié au moins apprécié · '
+    + noms.length + ' plat' + (noms.length>1?'s':'') + ' jugé' + (noms.length>1?'s':'') + '</p>';
+}
+
+/* --- archivage : appelé quand une nouvelle semaine arrive -------- */
+function archiver(){
+  const juges = DATA.jours.some((d,i)=>notes[platDuJour(i).n]);
+  if(!juges) return;                       // rien à garder
+  const stamp = new Date();
+  hist.unshift({
+    s: DATA.semaine || '',
+    d: stamp.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}),
+    p: DATA.jours.map((d,i)=>{
+      const o = platDuJour(i), e = notes[o.n] || {};
+      return {n:o.n, v:e.v || null, note:e.n || ''};
+    })
+  });
+  hist = hist.slice(0, 40);                // on ne garde pas l'infini
+  Store.set("hist", hist);
+}
+
+
+function renderAll(){ renderMenu(); renderCourses(); renderRecettes(); renderGestes();
+                      renderDebrief(); renderHistorique(); renderPalmares(); }
 
 /* --- réglages --------------------------------------------------- */
 function dire(txt, ok){
@@ -957,7 +1197,9 @@ function valider(obj){
 }
 
 function appliquer(obj, msg){
-  DATA = obj; sel = DATA.jours.map(()=>0); coche = {};
+  archiver();                              // la semaine sortante rejoint l'historique
+  DATA = obj; sel = DATA.jours.map(()=>0); coche = {}; notes = {};
+  Store.set("notes", notes);
   Store.set("semaine", DATA); save();
   $("json").value = '';
   renderAll();
@@ -1040,7 +1282,7 @@ async function lireLien(){
 }
 window.addEventListener('hashchange', lireLien);
 $("export").addEventListener('click',()=>{
-  const b = new Blob([JSON.stringify({semaine:DATA,sel,coche},null,2)],{type:'application/json'});
+  const b = new Blob([JSON.stringify({semaine:DATA,sel,coche,notes,hist},null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b); a.download = 'popote-sauvegarde.json'; a.click();
   URL.revokeObjectURL(a.href); flash('Sauvegarde exportée');
@@ -1048,7 +1290,8 @@ $("export").addEventListener('click',()=>{
 $("effacer").addEventListener('click',()=>{
   if(!confirm("Effacer la semaine, les substitutions et les cases cochées ?")) return;
   Store.del("semaine"); Store.del("sel"); Store.del("coche");
-  DATA = DEFAUT; sel = DATA.jours.map(()=>0); coche = {};
+  Store.del("notes"); Store.del("hist");
+  DATA = DEFAUT; sel = DATA.jours.map(()=>0); coche = {}; notes = {}; hist = [];
   renderAll(); flash('Remise à zéro effectuée');
 });
 $("raz").addEventListener('click',()=>{ coche = {}; save(); renderCourses(); });

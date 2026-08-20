@@ -78,9 +78,10 @@ publication en cours ou en échec y est détaillée.
 
 Ouvre l'adresse sur ton ordinateur d'abord. Trois choses à contrôler :
 
-1. Les cinq onglets répondent — Menu, Courses, Recettes, Assiette, Réglages.
+1. Les six onglets répondent — Menu, Courses, Recettes, Assiette, Débrief, Réglages.
 2. Le bouton **Substituer** change le plat et la liste de courses se recalcule.
 3. Une case cochée dans Courses reste cochée après un rechargement de la page.
+4. Un verdict posé dans Débrief y est toujours après rechargement.
 
 Si le troisième point échoue, c'est que le navigateur bloque le stockage local : vérifie que tu
 n'es pas en navigation privée.
@@ -105,7 +106,7 @@ Dans le dépôt, clique sur `index.html` puis sur l'icône **crayon** en haut à
 
 **Le piège classique :** tu modifies, tu recharges sur ton téléphone, rien ne change. Le service
 worker sert consciencieusement sa copie. La parade : ouvre `sw.js` et incrémente la ligne
-`const CACHE = 'popote-v8';` en `popote-v9`. Un nom de cache différent force le navigateur à tout
+`const CACHE = 'popote-v9';` en `popote-v10`. Un nom de cache différent force le navigateur à tout
 retélécharger. Prends le réflexe de le faire à chaque modification.
 
 ---

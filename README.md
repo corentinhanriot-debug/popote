@@ -34,7 +34,12 @@ cible du demi-quart-quart.
 **Assiette** — le schéma de l'assiette équilibrée, les équivalences de portion, les repères sans
 balance, et dix principes de cuisine expliqués par leur raison physique.
 
-**Réglages** — le champ où coller la semaine suivante, l'export de sauvegarde et les instructions
+**Débrief** — un verdict par plat (Encore / Bien / Bof / Jamais / Non cuisiné) avec une raison
+libre, l'historique des semaines archivées automatiquement, et un palmarès qui cumule tous les
+verdicts. Un bouton copie le tout en texte : c'est ce bloc qui referme la boucle et fait que le
+menu suivant tient compte du précédent.
+
+**Réglages** — le chargement de la semaine, l'export de sauvegarde et les instructions
 d'installation.
 
 ## Comment ça marche
@@ -92,8 +97,8 @@ worker continue de servir l'ancienne version.
 
 - [x] Chargement par lien, sans copier-coller
 - [x] Répartition masse / calories par plat
-- [ ] Onglet Débrief : noter chaque plat depuis l'app
-- [ ] Historique des semaines passées
+- [x] Onglet Débrief : noter chaque plat depuis l'app
+- [x] Historique des semaines et palmarès
 - [ ] Synchronisation entre deux téléphones
 
 ---

@@ -8,7 +8,7 @@
    l'ancienne version stockée en cache, et tu croiras que ta
    modification n'a pas marché.
    ------------------------------------------------------------------ */
-const CACHE = 'popote-v8';
+const CACHE = 'popote-v9';
 
 const ASSETS = [
   './',

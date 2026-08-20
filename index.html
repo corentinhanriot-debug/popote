@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Popote</title>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#F2F1EC">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Popote">
+
+<style>
+/* ============================================================
+   POPOTE — DIRECTION ARTISTIQUE
+   Laboratoire + potager. Référence : The Ordinary.
+   Le nom du plat est sa formule. Les données sont brutes.
+   Aucun arrondi, aucune ombre, aucune icône pleine.
+   La structure est faite de filets, pas de cartes.
+   ============================================================ */
+:root{
+  --papier:#F2F1EC;
+  --encre:#16181A;
+  --chloro:#46603F;      /* vert potager désaturé — usage fonctionnel */
+  --terre:#9C5A34;       /* terre cuite désaturée — second signal */
+  --filet:#D6D4CC;
+  --gris:#7C7970;
+  --voile:#E9E7E1;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --papier:#101110; --encre:#E9E8E3; --chloro:#8FA987; --terre:#C58A62;
+    --filet:#2B2C2A;  --gris:#8B8880;  --voile:#191A18;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--papier);color:var(--encre);
+  font:400 16px/1.55 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  padding-bottom:calc(70px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+
+/* --- primitives typographiques ------------------------------ */
+.cap{ text-transform:uppercase; letter-spacing:.15em; font-weight:600; }
+.mono{ font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+       font-variant-numeric:tabular-nums; }
+.rule{ border:0;border-top:1px solid var(--filet);margin:0; }
+
+/* --- en-tête ------------------------------------------------- */
+header{
+  position:sticky;top:0;z-index:20;background:var(--papier);
+  padding:calc(20px + env(safe-area-inset-top)) 20px 12px;
+  border-bottom:1px solid var(--encre);
+}
+.wordmark{
+  display:flex;align-items:center;gap:9px;
+  font-size:15px;text-transform:uppercase;letter-spacing:.34em;font-weight:600;
+}
+.wordmark svg{width:15px;height:15px;stroke:var(--chloro);fill:none;
+  stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.specline{
+  margin-top:7px;font-size:10.5px;letter-spacing:.09em;color:var(--gris);
+  text-transform:uppercase;
+}
+
+main{max-width:640px;margin:0 auto;padding:0 20px 40px}
+.panel{display:none}.panel.on{display:block}
+
+/* --- fiche plat ---------------------------------------------- */
+.fiche{padding:26px 0 24px;border-bottom:1px solid var(--filet)}
+.fiche:last-of-type{border-bottom:1px solid var(--encre)}
+.ref{
+  display:flex;align-items:baseline;gap:10px;
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gris);
+}
+.ref b{color:var(--encre);font-weight:600}
+.ref .t{margin-left:auto;letter-spacing:.1em}
+.formule{
+  margin:14px 0 0;font-size:14.5px;line-height:1.45;letter-spacing:.02em;
+  text-transform:uppercase;font-weight:500;
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+.formule em{font-style:normal;color:var(--gris)}
+.nom{margin:11px 0 3px;font-size:16px;font-weight:400;line-height:1.4}
+.desc{margin:0;font-size:13px;color:var(--gris);line-height:1.5}
+.usage{margin:11px 0 0;font-size:13px;color:var(--gris);line-height:1.5;
+  padding-left:12px;border-left:1px solid var(--filet)}
+
+.data{
+  display:flex;align-items:center;gap:0;margin-top:18px;
+  border-top:1px solid var(--filet);border-bottom:1px solid var(--filet);
+}
+.data span{
+  flex:1;padding:9px 0;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gris);border-right:1px solid var(--filet);text-align:center;
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+.data span:last-child{border-right:0}
+.data span b{display:block;color:var(--encre);font-weight:600;font-size:13px;
+  letter-spacing:.03em;margin-bottom:1px}
+
+.sub{
+  margin-top:14px;width:100%;background:none;color:var(--encre);
+  border:1px solid var(--encre);padding:11px 14px;cursor:pointer;
+  font-family:inherit;font-weight:600;font-size:10.5px;line-height:1;letter-spacing:.18em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.sub:active{background:var(--encre);color:var(--papier)}
+.sub i{font-style:normal;letter-spacing:.1em;color:var(--gris);font-weight:500}
+.sub:active i{color:var(--papier)}
+
+.bilan{
+  margin:26px 0 0;padding:16px 0 0;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gris);line-height:2;
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+.bilan b{color:var(--encre);font-weight:600}
+
+/* --- courses -------------------------------------------------- */
+.jauge{
+  display:flex;align-items:center;gap:14px;padding:16px 0;
+  border-bottom:1px solid var(--encre);
+}
+.jauge .n{font-size:11px;letter-spacing:.12em;font-weight:600;white-space:nowrap;
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace}
+.piste{flex:1;height:1px;background:var(--filet);position:relative}
+.piste i{position:absolute;left:0;top:-1px;height:3px;background:var(--chloro);
+  width:0;transition:width .3s}
+.lien{background:none;border:0;padding:4px 0;cursor:pointer;color:var(--gris);
+  font-family:inherit;font-weight:600;font-size:10px;line-height:1;letter-spacing:.14em;text-transform:uppercase;
+  border-bottom:1px solid var(--filet)}
+
+.rayon{
+  margin:28px 0 0;padding-bottom:7px;border-bottom:1px solid var(--encre);
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+  display:flex;align-items:baseline;
+}
+.rayon i{margin-left:auto;font-style:normal;color:var(--gris);font-weight:400;
+  letter-spacing:.1em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+ul.liste{list-style:none;margin:0;padding:0}
+ul.liste li{border-bottom:1px solid var(--filet)}
+ul.liste label{display:flex;align-items:center;gap:14px;padding:14px 2px;cursor:pointer;
+  font-size:15px;user-select:none}
+ul.liste input{
+  appearance:none;-webkit-appearance:none;flex:0 0 auto;width:15px;height:15px;
+  border:1px solid var(--encre);margin:0;position:relative;background:transparent;
+}
+ul.liste input:checked{background:var(--chloro);border-color:var(--chloro)}
+ul.liste input:checked::after{
+  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid var(--papier);border-width:0 1.5px 1.5px 0;transform:rotate(43deg);
+}
+ul.liste input:checked ~ .txt{color:var(--gris);text-decoration:line-through;
+  text-decoration-thickness:1px}
+.txt{flex:1;transition:color .15s}
+.q{margin-left:auto;color:var(--gris);font-size:12px;letter-spacing:.06em;
+  white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+ul.liste input:checked ~ .q{opacity:.45}
+
+/* --- accordéons (recettes, gestes) ---------------------------- */
+details.bloc{border-bottom:1px solid var(--filet)}
+details.bloc summary{
+  padding:18px 2px;cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:12px;
+}
+details.bloc summary::-webkit-details-marker{display:none}
+details.bloc summary .idx{
+  font-size:10px;letter-spacing:.14em;color:var(--gris);flex:0 0 auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;padding-top:3px;
+}
+details.bloc summary .ttl{font-size:15px;line-height:1.4}
+details.bloc summary::after{
+  content:"+";margin-left:auto;flex:0 0 auto;color:var(--gris);font-size:16px;
+  line-height:1;padding-top:2px;
+}
+details.bloc[open] summary::after{content:"–"}
+.corps{padding:0 2px 24px}
+.corps h4{margin:22px 0 9px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gris);font-weight:600}
+.corps h4:first-child{margin-top:0}
+.corps ul{list-style:none;margin:0;padding:0}
+.corps ul li{display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--voile);
+  font-size:14.5px}
+.corps ul li span{margin-left:auto;color:var(--gris);font-size:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.corps ol{margin:0;padding:0;list-style:none;counter-reset:e}
+.corps ol li{counter-increment:e;position:relative;padding:0 0 16px 30px;font-size:15px;
+  line-height:1.6}
+.corps ol li::before{
+  content:counter(e,decimal-leading-zero);position:absolute;left:0;top:3px;
+  font-size:10px;letter-spacing:.1em;color:var(--chloro);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.note{margin:8px 0 0;padding:13px 14px;background:var(--voile);font-size:13.5px;line-height:1.55}
+.note b{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--terre);
+  display:block;margin-bottom:5px;font-weight:600}
+.nutri{margin:12px 0 0;font-size:11px;letter-spacing:.06em;color:var(--gris);line-height:1.6;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* --- bloc répartition -------------------------------------------- */
+.mont svg{width:100%;max-width:250px;display:block;margin:4px auto 0;color:var(--encre)}
+.mont .plateau{fill:none;stroke:currentColor;stroke-opacity:.3;stroke-width:1}
+.mont .sep{stroke:var(--papier);stroke-width:1.2;fill:none}
+.typ{margin:8px 0 0;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gris);text-align:center}
+ul.leg{list-style:none;margin:16px 0 0;padding:0}
+ul.leg li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--voile);font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;line-height:1.35}
+ul.leg li:last-child{border-bottom:0}
+ul.leg .sw{width:9px;height:9px;flex:0 0 auto;margin-top:2px}
+ul.leg .pc{margin-left:auto;padding-left:10px;color:var(--gris);letter-spacing:.02em;white-space:nowrap;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.lecture{margin:16px 0 0;font-size:14px;line-height:1.6;color:var(--gris)}
+.lecture b{color:var(--encre);font-weight:600}
+
+/* --- titres de section ---------------------------------------- */
+.section{
+  margin:34px 0 0;padding-bottom:8px;border-bottom:1px solid var(--encre);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;
+}
+.intro{margin:14px 0 0;font-size:14px;color:var(--gris);line-height:1.6}
+.bloc-txt{padding:22px 0;border-bottom:1px solid var(--filet)}
+.bloc-txt p{margin:0 0 12px;font-size:14.5px;line-height:1.6}
+.bloc-txt p:last-child{margin-bottom:0}
+
+/* --- assiette -------------------------------------------------- */
+.plaque{width:100%;max-width:290px;display:block;margin:22px auto 6px;color:var(--encre)}
+.legende{margin:0 auto 4px;max-width:290px}
+ul.tab{list-style:none;margin:0;padding:0}
+ul.tab li{display:flex;gap:14px;align-items:baseline;padding:11px 0;
+  border-bottom:1px solid var(--voile);font-size:14.5px}
+ul.tab li:last-child{border-bottom:0}
+ul.tab li span{margin-left:auto;color:var(--gris);text-align:right;font-size:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em}
+.herbier{display:block;width:64px;margin:34px auto 0;stroke:var(--chloro);fill:none;
+  stroke-width:.9;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+
+/* --- réglages --------------------------------------------------- */
+textarea{
+  width:100%;min-height:130px;border:1px solid var(--filet);border-radius:0;
+  padding:13px;background:var(--voile);color:var(--encre);resize:vertical;
+  font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+textarea:focus{outline:0;border-color:var(--encre)}
+.act{
+  background:var(--encre);color:var(--papier);border:1px solid var(--encre);
+  padding:13px 20px;cursor:pointer;margin-top:12px;
+  font-family:inherit;font-weight:600;font-size:10.5px;line-height:1;letter-spacing:.18em;text-transform:uppercase;
+}
+.act.vide{background:none;color:var(--encre)}
+.act.att{background:none;color:var(--terre);border-color:var(--terre)}
+.msg{margin-top:12px;font-size:12.5px;line-height:1.5;padding:11px 13px;display:none;
+  border-left:2px solid var(--chloro);background:var(--voile)}
+.msg.ok{display:block}
+.msg.ko{display:block;border-left-color:var(--terre)}
+.etapes{margin:0;padding:0;list-style:none;counter-reset:s}
+.etapes li{counter-increment:s;position:relative;padding:0 0 12px 30px;font-size:14.5px;
+  line-height:1.55}
+.etapes li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;
+  font-size:10px;color:var(--chloro);letter-spacing:.1em;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.pied{margin:30px 0 0;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gris);text-align:center;line-height:2.2}
+
+/* --- navigation ------------------------------------------------- */
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--papier);
+  border-top:1px solid var(--encre);display:flex;
+  padding:0 8px calc(env(safe-area-inset-bottom));
+}
+nav button{
+  flex:1;background:none;border:0;padding:17px 2px 15px;cursor:pointer;color:var(--gris);
+  font-family:inherit;font-weight:600;font-size:9.5px;line-height:1;letter-spacing:.06em;text-transform:uppercase;
+  border-top:2px solid transparent;margin-top:-1px;
+}
+nav button.on{color:var(--encre);border-top-color:var(--chloro)}
+
+.flash{
+  position:fixed;left:20px;right:20px;bottom:calc(84px + env(safe-area-inset-bottom));
+  background:var(--encre);color:var(--papier);z-index:50;padding:13px 15px;
+  font-family:inherit;font-weight:600;font-size:10px;line-height:1.4;letter-spacing:.16em;text-transform:uppercase;
+  opacity:0;pointer-events:none;transition:opacity .22s;text-align:center;
+}
+.flash.on{opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 22V7"/>
+      <path d="M12 13c0-3 2.4-5.2 5.6-5.6C17.4 10.6 15.2 13 12 13z"/>
+      <path d="M12 17.5c0-2.6-2-4.6-4.8-4.9C7.4 15.4 9.3 17.5 12 17.5z"/>
+      <path d="M12 8.5c0-2.6 1.5-4.4 3.6-5.2C15.4 5.8 14 7.8 12 8.5z"/>
+    </svg>
+    Popote
+  </div>
+  <div class="specline mono" id="spec"></div>
+</header>
+
+<main>
+  <section class="panel on" id="p-menu">
+    <div id="fiches"></div>
+    <div class="bilan mono" id="bilan"></div>
+  </section>
+
+  <section class="panel" id="p-courses">
+    <div class="jauge">
+      <span class="n" id="cpt">00 / 00</span>
+      <span class="piste"><i id="prog"></i></span>
+      <button class="lien" id="raz">Décocher</button>
+    </div>
+    <div id="courses"></div>
+    <div class="pied">Ordre de circulation en magasin<br>
+      Huile · sel · épices · vinaigre supposés présents</div>
+  </section>
+
+  <section class="panel" id="p-recettes"><div id="recettes"></div></section>
+
+  <section class="panel" id="p-assiette">
+    <div class="section">01 — L'assiette de référence</div>
+    <p class="intro">Une règle visuelle, valable pour presque tous les dîners :
+      la moitié en légumes, un quart en protéines, un quart en féculents.</p>
+
+    <svg viewBox="0 0 200 200" class="plaque" role="img"
+         aria-label="Assiette : moitié légumes, quart protéines, quart féculents">
+      <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor"
+              stroke-opacity=".22" stroke-width="1"/>
+      <path d="M100,18 A82,82 0 0,0 100,182 Z" fill="#46603F" fill-opacity=".82"/>
+      <path d="M100,100 L100,18 A82,82 0 0,1 182,100 Z" fill="#9C5A34" fill-opacity=".82"/>
+      <path d="M100,100 L182,100 A82,82 0 0,1 100,182 Z" fill="#C9A24B" fill-opacity=".82"/>
+      <circle cx="100" cy="100" r="82" fill="none" stroke="var(--papier)" stroke-width="1"/>
+      <line x1="100" y1="18" x2="100" y2="182" stroke="var(--papier)" stroke-width="1"/>
+      <line x1="100" y1="100" x2="182" y2="100" stroke="var(--papier)" stroke-width="1"/>
+      <text x="56"  y="97"  fill="#F2F1EC" font-size="9" letter-spacing="1.6"
+            text-anchor="middle" font-weight="600">LÉGUMES</text>
+      <text x="56"  y="112" fill="#F2F1EC" font-size="10" text-anchor="middle"
+            opacity=".8" font-family="ui-monospace,Menlo,monospace">250–300 G</text>
+      <text x="138" y="60"  fill="#F2F1EC" font-size="8" letter-spacing="1.4"
+            text-anchor="middle" font-weight="600">PROTÉINES</text>
+      <text x="138" y="74"  fill="#F2F1EC" font-size="9.5" text-anchor="middle"
+            opacity=".8" font-family="ui-monospace,Menlo,monospace">130–150 G</text>
+      <text x="138" y="136" fill="#F2F1EC" font-size="8" letter-spacing="1.4"
+            text-anchor="middle" font-weight="600">FÉCULENTS</text>
+      <text x="138" y="150" fill="#F2F1EC" font-size="9.5" text-anchor="middle"
+            opacity=".8" font-family="ui-monospace,Menlo,monospace">70–80 G</text>
+    </svg>
+    <div class="legende pied" style="margin-top:0">Poids pesés crus · + 1 à 1,5 c. à s. d'huile</div>
+
+    <div class="section">02 — Équivalences protéiques</div>
+    <p class="intro">Ce qui remplace un quart d'assiette, pour une portion.</p>
+    <ul class="tab">
+      <li>Viande ou poisson<span>130–150 G CRUS</span></li>
+      <li>Œufs<span>2 À 3</span></li>
+      <li>Légumineuses<span>60–70 G CRUES</span></li>
+      <li>Tofu ou tempeh<span>150 G</span></li>
+      <li>Fromage en plat principal<span>60–80 G</span></li>
+    </ul>
+    <p class="intro">Côté féculents, 70 à 80 g crus donnent une fois cuits environ 200 g de pâtes
+      ou de riz, ou 250 g de pommes de terre. C'est systématiquement moins que ce qu'on verse
+      spontanément dans la casserole.</p>
+
+    <div class="section">03 — Repères sans balance</div>
+    <ul class="tab">
+      <li>La paume de la main<span>1 PORTION DE VIANDE</span></li>
+      <li>Le poing fermé<span>1 PORTION DE FÉCULENTS CUITS</span></li>
+      <li>Les deux mains en coupe<span>1 PORTION DE LÉGUMES</span></li>
+    </ul>
+
+    <div class="section">04 — Les dix gestes</div>
+    <p class="intro">Des principes, pas des astuces : chacun est expliqué par sa raison physique,
+      ce qui permet de le transposer à d'autres plats.</p>
+    <div id="gestes"></div>
+
+    <svg viewBox="0 0 60 120" class="herbier" aria-hidden="true">
+      <path d="M30 118V16"/>
+      <path d="M30 96c0-11 8-18 20-19-1 11-9 19-20 19z"/>
+      <path d="M30 80c0-11-8-18-20-19 1 11 9 19 20 19z"/>
+      <path d="M30 62c0-11 7.5-18 19-19-1 11-8.5 19-19 19z"/>
+      <path d="M30 46c0-11-7.5-18-19-19 1 11 8.5 19 19 19z"/>
+      <path d="M30 30c0-9 5-15 12-17.5C41 21 37 27.5 30 30z"/>
+      <path d="M30 20c0-7-4-12-9.5-14C21 13 24.5 18 30 20z"/>
+    </svg>
+  </section>
+
+  <section class="panel" id="p-reglages">
+    <div class="section">01 — Charger la semaine</div>
+    <p class="intro">Trois voies, de la plus rapide à la plus manuelle. Dans tous les cas, les
+      cases cochées et les substitutions sont remises à zéro.</p>
+    <p class="intro"><b>Le lien.</b> Le dimanche, tu reçois un lien : tu l'ouvres, Popote se lance
+      avec la semaine déjà chargée. Rien à copier.</p>
+    <p class="intro"><b>Le presse-papiers.</b> Si tu as copié le bloc, ce bouton le récupère et
+      le charge d'un geste.</p>
+    <div><button class="act vide" id="coller">Coller le presse-papiers</button></div>
+    <p class="intro" style="margin-top:22px"><b>À la main.</b> En dernier recours, colle le bloc
+      dans le champ ci-dessous.</p>
+    <textarea id="json" placeholder='{ "semaine": "…", "jours": [ … ] }'></textarea>
+    <div><button class="act" id="charger">Charger</button></div>
+    <div class="msg" id="msg"></div>
+
+    <div class="section">02 — Envoyer les photos</div>
+    <p class="intro">Popote ne sait pas envoyer d'image : c'est un document, pas un service.
+      Le bouton ouvre Claude, où tu joins tes quatre photos — frigo, placards, congélateur,
+      corbeille.</p>
+    <div><button class="act vide" id="claude">Ouvrir Claude</button></div>
+
+    <div class="section">03 — Sauvegarde</div>
+    <p class="intro">Exporte la semaine en cours. À faire avant de vider le cache du navigateur,
+      qui effacerait tout.</p>
+    <div>
+      <button class="act vide" id="export">Exporter</button>
+      <button class="act att" id="effacer">Tout effacer</button>
+    </div>
+
+    <div class="section">04 — Installation</div>
+    <ol class="etapes" style="margin-top:16px">
+      <li>Ouvrir cette page dans <b>Safari</b> — sur iPhone, seul Safari sait installer.</li>
+      <li>Appuyer sur <b>Partager</b>, le carré à la flèche montante.</li>
+      <li>Faire défiler, choisir <b>Sur l'écran d'accueil</b>.</li>
+      <li>L'app s'ouvre alors en plein écran et fonctionne hors ligne.</li>
+    </ol>
+
+    <div class="pied" id="ver"></div>
+  </section>
+</main>
+
+<div class="flash" id="flash"></div>
+
+<nav>
+  <button class="on" data-p="menu">Menu</button>
+  <button data-p="courses">Courses</button>
+  <button data-p="recettes">Recettes</button>
+  <button data-p="assiette">Assiette</button>
+  <button data-p="reglages">Réglages</button>
+</nav>
+
+<script>
+"use strict";
+const VERSION = "2.5";
+const RAYONS = {LEG:"Fruits & légumes",BOU:"Boucherie",POI:"Poissonnerie",
+                CRE:"Crèmerie",EPI:"Épicerie salée",SUR:"Surgelés",PAI:"Pain"};
+const ORDRE = ["LEG","BOU","POI","CRE","EPI","SUR","PAI"];
+
+/* --- stockage ------------------------------------------------- */
+const Store = {
+  get(k,d){ try{ const v=localStorage.getItem("popote."+k); return v===null?d:JSON.parse(v); }
+            catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem("popote."+k,JSON.stringify(v)); return true; }
+            catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem("popote."+k); }catch(e){} }
+};
+
+/* --- semaine par défaut ---------------------------------------
+   f  = formule : composition massique réelle, top 3, façon étiquette
+   sd = descripteur technique
+   --------------------------------------------------------------- */
+const DEFAUT = {
+ semaine:"Semaine 35 · 24–28 août",
+ jours:[
+ {j:"Lundi", opts:[
+  {n:"Gnocchis poêlés, courgettes et pesto minute",t:"25 min",p:9,k:750,pr:23,
+   f:"COURGETTE 34 % + GNOCCHI 34 % + TOMATE CERISE 22 %",
+   sd:"Poêlée végétarienne à cuisson unique",
+   rp:[["LÉGUMES",300,75],["PROTÉINES",25,100],["FÉCULENTS",220,320],["MATIÈRES GRASSES",30,260]],
+   tags:[["Végétarien",0],["Une seule poêle",0]],
+   w:"Écoule les courgettes et le basilic. Le pesto se fait au blender en deux minutes.",
+   ing:[["LEG","courgettes",2,"",0],["LEG","tomates cerises",250,"g",0],
+        ["LEG","basilic (bouquet)",1,"",0],["LEG","ail (tête)",1,"",1],
+        ["CRE","parmesan",50,"g",0],["EPI","gnocchis frais",400,"g",0],
+        ["EPI","pignons ou noix de cajou",30,"g",0],["P","huile d'olive",0,"",1]],
+   et:["Mixe au blender le basilic effeuillé, les pignons, l'ail, le parmesan et 4 c. à s. d'huile. Procède par à-coups : un pesto trop lisse tourne à la crème et perd son mordant.",
+       "Taille les courgettes en demi-rondelles de 5 mm et fais-les revenir 8 min à feu vif sans les remuer sans arrêt — c'est le contact prolongé avec le fond qui les colore et les sucre.",
+       "Ajoute les tomates cerises coupées en deux, sale, poursuis 3 min.",
+       "En parallèle, poêle les gnocchis crus, pas bouillis, 6 à 8 min dans un peu d'huile jusqu'à ce qu'ils dorent et gonflent.",
+       "Réunis hors du feu et ajoute le pesto. Il ne doit jamais cuire, sinon il brunit."],
+   tip:"Le pesto en trop tient 5 jours sous une fine couche d'huile et sauve un déjeuner de pâtes."},
+  {n:"Shakshuka aux poivrons, œufs et feta",t:"30 min",p:8,k:630,pr:28,
+   f:"TOMATE 42 % + POIVRON 21 % + ŒUF 14 %",
+   sd:"Œufs pochés en sauce, cuisson à couvert",
+   rp:[["LÉGUMES",445,135],["PROTÉINES",140,250],["FÉCULENTS",60,155],["MATIÈRES GRASSES",10,90]],
+   tags:[["Végétarien",0],["Un seul plat",0]],
+   w:"Tout mijote dans la même poêle, les œufs finissent dedans. Le pain remplace le féculent.",
+   ing:[["LEG","poivrons rouges",2,"",0],["LEG","tomates",6,"",0],["LEG","oignons",1,"",0],
+        ["LEG","ail (tête)",1,"",1],["LEG","coriandre (bouquet)",1,"",0],
+        ["CRE","œufs",4,"",0],["CRE","feta",80,"g",0],["PAI","pain de campagne",1,"",0],
+        ["P","cumin, paprika",0,"",1],["P","huile d'olive",0,"",1]],
+   et:["Fais suer l'oignon et les poivrons en lanières 10 min à feu moyen. Ils doivent fondre, pas colorer.",
+       "Ajoute l'ail haché et les épices, remue 30 secondes dans le gras : c'est là que les arômes se libèrent.",
+       "Ajoute les tomates en dés, sale, laisse réduire 10 min jusqu'à une sauce épaisse — trop liquide, les œufs s'y noient.",
+       "Creuse quatre puits, casse un œuf dans chacun, couvre et laisse 5 à 6 min : le blanc pris, le jaune coulant.",
+       "Émiette la feta et la coriandre par-dessus, sers avec le pain grillé."],
+   tip:"Couvrir est indispensable : c'est la vapeur qui cuit le dessus des œufs, pas la poêle."},
+  {n:"Risotto crémeux courgette et citron",t:"35 min",p:8,k:690,pr:21,
+   f:"COURGETTE 50 % + RIZ ARBORIO 22 % + OIGNON 12 %",
+   sd:"Riz à l'amidon lié, finition acide",
+   rp:[["LÉGUMES",240,70],["PROTÉINES",30,120],["FÉCULENTS",235,315],["MATIÈRES GRASSES",20,160]],
+   tags:[["Végétarien",0],["Réconfortant",0]],
+   w:"Demande de la présence mais aucune technique. Le citron empêche le plat d'être lourd.",
+   ing:[["LEG","courgettes",2,"",0],["LEG","citrons",1,"",0],["LEG","oignons",1,"",0],
+        ["CRE","parmesan",60,"g",0],["CRE","beurre",1,"plaquette",1],
+        ["EPI","riz arborio",250,"g",0],["EPI","bouillon de légumes",1,"boîte",1],
+        ["P","huile d'olive",0,"",1]],
+   et:["Prépare 1 litre de bouillon et garde-le frémissant : verser du liquide froid sur le riz casse la cuisson à chaque louche.",
+       "Fais suer l'oignon, ajoute 180 g de riz et remue 2 min jusqu'à ce que les grains deviennent translucides sur les bords.",
+       "Ajoute le bouillon louche par louche en attendant l'absorption. 18 min. C'est le frottement des grains qui libère l'amidon et fait la crème — d'où l'obligation de remuer.",
+       "À mi-cuisson, ajoute les courgettes en petits dés.",
+       "Hors du feu, incorpore le beurre froid, le parmesan, le zeste et le jus du citron. Couvre 2 min."],
+   tip:"Le risotto doit couler légèrement dans l'assiette. S'il tient debout, il est trop cuit."}]},
+
+ {j:"Mardi", opts:[
+  {n:"Poulet paprika à l'airfryer, semoule aux herbes",t:"30 min",p:10,k:680,pr:48,
+   f:"POULET 35 % + CONCOMBRE 24 % + SEMOULE 19 %",
+   sd:"Volaille marinée à l'air chaud, base semoule",
+   rp:[["LÉGUMES",150,30],["PROTÉINES",185,255],["FÉCULENTS",210,280],["MATIÈRES GRASSES",10,110]],
+   tags:[["Airfryer",1],["Volaille",0]],
+   w:"L'airfryer travaille seul pendant que la semoule gonfle : quinze minutes de présence réelle.",
+   ing:[["BOU","filets de poulet",300,"g",0],["LEG","concombre",1,"",0],["LEG","citrons",1,"",0],
+        ["LEG","persil plat (bouquet)",1,"",0],["LEG","coriandre (bouquet)",1,"",0],
+        ["CRE","yaourt grec",1,"pot",0],["EPI","semoule fine",500,"g",0],
+        ["P","paprika, cumin",0,"",1],["P","huile d'olive",0,"",1]],
+   et:["Coupe le poulet en gros cubes, mélange avec 2 c. à s. d'huile, paprika, cumin, sel et le jus d'un demi-citron. Dix minutes de marinade suffisent sur des cubes.",
+       "Airfryer 200 °C, 12 à 14 min, en secouant à mi-cuisson. Ne surcharge pas le panier : entassé, le poulet cuit à la vapeur au lieu de rôtir.",
+       "Couvre 160 g de semoule d'un volume égal d'eau bouillante salée avec un filet d'huile, 5 min à couvert. Égrène et ajoute les herbes.",
+       "Mélange le concombre en dés avec le yaourt, le reste du citron, du sel et de la coriandre.",
+       "Sers le poulet sur la semoule, la sauce à côté."],
+   tip:"Double la dose de poulet pour une gamelle : le coût marginal est faible et le froid ne lui fait rien."},
+  {n:"Cuisses de poulet citron-thym, grenailles à l'airfryer",t:"35 min",p:9,k:720,pr:42,
+   f:"POMME DE TERRE 47 % + POULET 38 % + SALADE 9 %",
+   sd:"Cuisses rôties à l'air chaud, base tubercule",
+   rp:[["LÉGUMES",90,25],["PROTÉINES",145,400],["FÉCULENTS",250,200],["MATIÈRES GRASSES",10,90]],
+   tags:[["Airfryer",1],["Peu de vaisselle",0]],
+   w:"Le morceau le moins cher et le plus savoureux du poulet. Tout cuit dans le même panier.",
+   ing:[["BOU","cuisses de poulet",4,"",0],["LEG","pommes de terre grenaille",500,"g",0],
+        ["LEG","citrons",1,"",0],["LEG","ail (tête)",1,"",1],["LEG","salade verte",1,"",0],
+        ["P","thym, moutarde, huile d'olive",0,"",1]],
+   et:["Frotte les cuisses d'huile, thym, sel, poivre et zeste de citron. Laisse-les revenir à température ambiante : une viande froide à cœur cuit mal.",
+       "Coupe les grenailles en deux, mélange-les à l'huile, au sel et aux gousses d'ail en chemise.",
+       "Airfryer 200 °C : les cuisses peau vers le haut 12 min, puis ajoute les pommes de terre autour et poursuis 15 min.",
+       "Vinaigrette moutarde-citron, salade assaisonnée au dernier moment.",
+       "Arrose du jus rendu au fond du panier avant de servir."],
+   tip:"Panier petit ? Fais les pommes de terre d'abord et garde-les au chaud : elles supportent l'attente, pas le poulet."},
+  {n:"Poulet teriyaki à l'airfryer, riz et haricots verts",t:"30 min",p:10,k:680,pr:47,
+   f:"HARICOT VERT 43 % + POULET 32 % + RIZ 17 %",
+   sd:"Volaille laquée, réduction soja-miel",
+   rp:[["LÉGUMES",200,70],["PROTÉINES",110,180],["FÉCULENTS",210,280],["MATIÈRES GRASSES",10,85],["ASSAISONNEMENT",40,65]],
+   tags:[["Airfryer",1],["Sucré-salé",0]],
+   w:"Une sauce à trois ingrédients qui donne l'illusion d'un plat de restaurant.",
+   ing:[["BOU","filets de poulet",300,"g",0],["LEG","haricots verts",400,"g",0],
+        ["LEG","gingembre frais",1,"morceau",1],["LEG","ail (tête)",1,"",1],
+        ["EPI","sauce soja",1,"bouteille",1],["EPI","riz basmati",500,"g",0],
+        ["EPI","miel",1,"pot",1],["P","huile neutre, sésame",0,"",1]],
+   et:["Mélange 4 c. à s. de soja, 2 c. à s. de miel, l'ail et le gingembre râpés. Garde la moitié de côté : la sauce qui a touché la viande crue ne se réutilise pas telle quelle.",
+       "Enrobe le poulet en lanières de la première moitié, airfryer 200 °C 12 min.",
+       "Lance 160 g de riz, fais sauter les haricots 6 min à la poêle avec un fond d'eau et un couvercle.",
+       "Fais réduire la seconde moitié 2 min jusqu'à ce qu'elle nappe la cuillère : c'est l'évaporation qui la rend brillante.",
+       "Nappe le poulet, parsème de sésame."],
+   tip:"Le miel brûle vite. Si ça colore trop, baisse à 180 °C plutôt que de raccourcir le temps."}]},
+
+ {j:"Mercredi", opts:[
+  {n:"Dahl de lentilles corail au lait de coco",t:"30 min",p:6,k:960,pr:32,
+   f:"LAIT DE COCO 26 % + OIGNON 20 % + TOMATE 20 %",
+   sd:"Légumineuse mijotée, base coco épicée",
+   rp:[["LÉGUMES",190,75],["PROTÉINES",225,315],["FÉCULENTS",195,260],["MATIÈRES GRASSES",130,305]],
+   tags:[["Végétarien",0],["Coût très bas",0]],
+   w:"Presque entièrement du placard. Les lentilles corail cuisent en 15 min sans trempage.",
+   ing:[["LEG","oignons",2,"",0],["LEG","ail (tête)",1,"",1],
+        ["LEG","gingembre frais",1,"morceau",1],["LEG","tomates",2,"",0],
+        ["LEG","coriandre (bouquet)",1,"",0],["EPI","lentilles corail",500,"g",0],
+        ["EPI","lait de coco",250,"ml",0],["EPI","riz basmati",500,"g",0],
+        ["P","curry, curcuma",0,"",1]],
+   et:["Fais suer les oignons 5 min. Ajoute l'ail et le gingembre râpés, puis les épices, et remue 30 secondes.",
+       "Ce passage des épices dans le gras chaud sépare un dahl parfumé d'un dahl fade : leurs arômes sont solubles dans l'huile, pas dans l'eau.",
+       "Ajoute 180 g de lentilles rincées, les tomates en dés, le lait de coco et 300 ml d'eau. Sale.",
+       "Mijote 15 à 18 min à feu doux. Les lentilles se délitent : c'est normal et recherché, c'est ce qui donne le crémeux.",
+       "Lance 150 g de riz en parallèle. Finis par un trait de citron et beaucoup de coriandre."],
+   tip:"C'est le plat le plus dense de la semaine, à cause du lait de coco. Réduis-le à 200 ml si tu veux l'alléger."},
+  {n:"Chili sin carne aux haricots rouges",t:"30 min",p:6,k:720,pr:27,
+   f:"TOMATE 26 % + HARICOT ROUGE 24 % + POIVRON 20 %",
+   sd:"Légumineuse mijotée, base tomate fumée",
+   rp:[["LÉGUMES",460,195],["PROTÉINES",180,200],["FÉCULENTS",195,260],["MATIÈRES GRASSES",10,70]],
+   tags:[["Végétarien",0],["Meilleur réchauffé",0]],
+   w:"Entièrement à base de conserves. Rassasiant sans viande grâce aux haricots.",
+   ing:[["LEG","oignons",2,"",0],["LEG","poivrons rouges",2,"",0],["LEG","ail (tête)",1,"",1],
+        ["LEG","coriandre (bouquet)",1,"",0],["EPI","haricots rouges",2,"boîtes",0],
+        ["EPI","tomates concassées",400,"g",0],["EPI","maïs",1,"boîte",0],
+        ["EPI","riz basmati",500,"g",0],["P","cumin, paprika fumé, piment",0,"",1]],
+   et:["Fais revenir oignons et poivrons en dés 8 min à feu moyen.",
+       "Ajoute l'ail et les épices, 30 secondes, puis les tomates concassées et les haricots rincés.",
+       "Rincer les haricots en conserve n'est pas cosmétique : le jus de trempage est très salé et rend le plat impossible à assaisonner.",
+       "Mijote 15 min à découvert pour réduire, ajoute le maïs sur la fin.",
+       "Goûte : un chili demande presque toujours plus de sel et un peu d'acidité qu'on ne croit."],
+   tip:"Un carré de chocolat noir fondu dedans arrondit l'acidité des tomates. Ce n'est pas une blague."},
+  {n:"Falafels à l'airfryer, taboulé de boulgour, sauce yaourt",t:"35 min",p:7,k:780,pr:31,
+   f:"POIS CHICHE 33 % + TOMATE 25 % + CONCOMBRE 16 %",
+   sd:"Légumineuse panée à l'air chaud, base céréale",
+   rp:[["LÉGUMES",340,90],["PROTÉINES",260,320],["FÉCULENTS",170,255],["MATIÈRES GRASSES",10,110]],
+   tags:[["Végétarien",0],["Airfryer",1]],
+   w:"Les falafels à l'airfryer évitent le bain de friture sans perdre le croustillant.",
+   ing:[["LEG","persil plat (bouquet)",2,"",0],["LEG","oignons",1,"",0],["LEG","ail (tête)",1,"",1],
+        ["LEG","citrons",1,"",0],["LEG","tomates",3,"",0],["LEG","concombre",1,"",0],
+        ["CRE","yaourt grec",1,"pot",0],["EPI","pois chiches",2,"boîtes",0],
+        ["EPI","boulgour",500,"g",0],["P","cumin, farine, huile",0,"",1]],
+   et:["Égoutte et sèche très bien les pois chiches, mixe-les avec oignon, ail, un bouquet de persil, cumin et sel. Garde une texture sableuse : en purée lisse, les boules se délitent.",
+       "Ajoute 2 c. à s. de farine, forme des boules, badigeonne d'huile.",
+       "Airfryer 190 °C, 14 min en retournant à mi-parcours.",
+       "120 g de boulgour couverts d'eau bouillante, deux fois son volume, 10 min, puis mélangés aux tomates, concombre, persil, citron et huile.",
+       "Sauce : yaourt, citron, sel, un peu d'ail râpé."],
+   tip:"Des pois chiches humides donnent des falafels qui s'écrasent. Étale-les 5 min sur un torchon avant de mixer."}]},
+
+ {j:"Jeudi", opts:[
+  {n:"Cabillaud poêlé, ratatouille express, boulgour",t:"35 min",p:14,k:570,pr:38,
+   f:"CABILLAUD 23 % + AUBERGINE 21 % + COURGETTE 17 %",
+   sd:"Poisson maigre poêlé, légumes d'été concassés",
+   rp:[["LÉGUMES",380,115],["PROTÉINES",105,110],["FÉCULENTS",155,210],["MATIÈRES GRASSES",15,135]],
+   tags:[["Poisson",0],["Légumes d'été",0]],
+   w:"Le poisson de la semaine. La ratatouille en dés cuit en 20 min au lieu d'une heure.",
+   ing:[["POI","dos de cabillaud",280,"g",0],["LEG","aubergines",1,"",0],["LEG","courgettes",1,"",0],
+        ["LEG","poivrons rouges",1,"",0],["LEG","tomates",2,"",0],["LEG","oignons",1,"",0],
+        ["LEG","ail (tête)",1,"",1],["EPI","boulgour",500,"g",0],["P","thym, huile d'olive",0,"",1]],
+   et:["Taille tous les légumes en dés de 1 cm, petits et réguliers. C'est le seul secret d'une ratatouille rapide : plus de surface, l'eau s'évapore vite.",
+       "Fais revenir l'aubergine seule 5 min à feu vif — c'est elle qui demande le plus de gras et de temps.",
+       "Ajoute oignon et poivron 5 min, puis courgette 4 min, enfin tomates et ail 5 min. Sale à chaque ajout.",
+       "120 g de boulgour dans deux fois son volume d'eau salée, 10 min à couvert.",
+       "Sèche bien le cabillaud — un poisson humide ne dore pas, il bout. Poêle 3 min sur la face la plus plate à feu vif, puis 2 min de l'autre côté. Le cœur reste juste nacré."],
+   tip:"La ratatouille est meilleure réchauffée : le reste fait un déjeuner avec un œuf poêlé dessus."},
+  {n:"Truite poêlée, écrasé de pommes de terre, haricots verts",t:"35 min",p:13,k:590,pr:34,
+   f:"POMME DE TERRE 41 % + HARICOT VERT 33 % + TRUITE 21 %",
+   sd:"Poisson gras poêlé, tubercule écrasé",
+   rp:[["LÉGUMES",230,70],["PROTÉINES",95,175],["FÉCULENTS",250,200],["MATIÈRES GRASSES",20,140]],
+   tags:[["Poisson",0],["Classique",0]],
+   w:"La truite est le poisson le mieux placé en prix et elle n'a aucun goût fort.",
+   ing:[["POI","filets de truite",2,"",0],["LEG","pommes de terre",500,"g",0],
+        ["LEG","haricots verts",400,"g",0],["LEG","citrons",1,"",0],
+        ["LEG","persil plat (bouquet)",1,"",0],["CRE","beurre",1,"plaquette",1],
+        ["P","huile d'olive",0,"",1]],
+   et:["Cuis les pommes de terre en morceaux 18 min, départ eau froide : ça fait cuire l'extérieur et l'intérieur au même rythme.",
+       "Blanchis les haricots 6 min dans la même eau sur la fin.",
+       "Écrase les pommes de terre à la fourchette avec de l'huile et un peu d'eau de cuisson. Pas de blender : le mixeur transforme l'amidon en colle.",
+       "Sèche les filets, poêle-les côté peau 4 min sans y toucher dans un beurre mousseux, puis 1 min de l'autre côté.",
+       "Déglace au jus de citron, arrose, parsème de persil."],
+   tip:"La peau colle si la poêle n'est pas assez chaude au départ. Attends que le beurre chante."},
+  {n:"Curry de crevettes au lait de coco, riz basmati",t:"25 min",p:14,k:700,pr:40,
+   f:"CREVETTE 36 % + LAIT DE COCO 30 % + RIZ 18 %",
+   sd:"Crustacé en sauce coco, cuisson courte",
+   rp:[["LÉGUMES",60,35],["PROTÉINES",120,135],["FÉCULENTS",195,260],["MATIÈRES GRASSES",125,240],["ASSAISONNEMENT",20,30]],
+   tags:[["Poisson",0],["Le plus rapide",1]],
+   w:"Vingt-cinq minutes montre en main. Les crevettes cuisent en trois minutes.",
+   ing:[["POI","crevettes décortiquées",300,"g",0],["LEG","oignons",1,"",0],
+        ["LEG","gingembre frais",1,"morceau",1],["LEG","ail (tête)",1,"",1],
+        ["LEG","citrons verts",1,"",0],["LEG","coriandre (bouquet)",1,"",0],
+        ["EPI","lait de coco",250,"ml",0],["EPI","pâte de curry rouge",1,"pot",1],
+        ["EPI","riz basmati",500,"g",0]],
+   et:["Lance 150 g de riz en premier : c'est lui le facteur limitant, pas le curry.",
+       "Fais revenir l'oignon 4 min, ajoute ail, gingembre et 2 c. à s. de pâte de curry, remue 1 min.",
+       "Verse le lait de coco, laisse frémir 8 min pour épaissir.",
+       "Ajoute les crevettes seulement à la fin, 3 min maximum. Au-delà elles deviennent caoutchouteuses et rien ne les rattrape.",
+       "Hors du feu : jus de citron vert et coriandre en quantité."],
+   tip:"Des crevettes surgelées décongelées la veille au frigo coûtent moitié moins et rendent moins d'eau."}]},
+
+ {j:"Vendredi", opts:[
+  {n:"Wok de porc, haricots verts et nouilles sautées",t:"25 min",p:11,k:700,pr:43,
+   f:"HARICOT VERT 43 % + PORC 27 % + NOUILLE 19 %",
+   sd:"Sauté haute température, base nouille",
+   rp:[["LÉGUMES",220,80],["PROTÉINES",90,190],["FÉCULENTS",215,315],["MATIÈRES GRASSES",10,90],["ASSAISONNEMENT",30,30]],
+   tags:[["Express",1],["Viande",0]],
+   w:"Tout est sauté dans le même wok, dans l'ordre des temps de cuisson.",
+   ing:[["BOU","émincé de porc",250,"g",0],["LEG","haricots verts",400,"g",0],
+        ["LEG","échalotes",1,"",0],["LEG","ail (tête)",1,"",1],
+        ["LEG","gingembre frais",1,"morceau",1],["EPI","nouilles chinoises",250,"g",0],
+        ["EPI","sauce soja",1,"bouteille",1],["P","miel, huile neutre",0,"",1]],
+   et:["Blanchis les haricots 5 min. Sans ce passage, ils restent crus : le temps de wok est trop court pour eux.",
+       "Cuis 180 g de nouilles, rince à l'eau froide, huile-les légèrement.",
+       "Chauffe le wok très fort. Saisis le porc 3 min sans y toucher les 90 premières secondes — il doit colorer, pas rendre son eau.",
+       "Réserve, fais sauter échalote, ail et gingembre 1 min, puis les haricots 2 min.",
+       "Remets tout, 4 c. à s. de soja et 1 c. à c. de miel, 2 min à feu vif, sers aussitôt."],
+   tip:"Le wok déteste la surcharge. Petite poêle ? Saisis le porc en deux fois."},
+  {n:"Bolognaise express, pâtes complètes et salade",t:"30 min",p:11,k:940,pr:51,
+   f:"TOMATE 35 % + BŒUF 26 % + PÂTE COMPLÈTE 17 %",
+   sd:"Viande hachée mijotée, base céréale complète",
+   rp:[["LÉGUMES",360,120],["PROTÉINES",125,390],["FÉCULENTS",250,340],["MATIÈRES GRASSES",10,90]],
+   tags:[["Valeur sûre",0],["Viande",0]],
+   w:"La version courte, honnête, qui n'essaie pas d'imiter les quatre heures de la vraie.",
+   ing:[["BOU","bœuf haché",300,"g",0],["LEG","oignons",1,"",0],["LEG","carottes",2,"",0],
+        ["LEG","ail (tête)",1,"",1],["LEG","salade verte",1,"",0],["CRE","parmesan",50,"g",0],
+        ["EPI","tomates concassées",400,"g",0],["EPI","pâtes complètes",500,"g",0],
+        ["P","origan, huile d'olive",0,"",1]],
+   et:["Fais revenir oignon et carottes en tout petits dés 8 min : c'est cette base qui apporte le sucré, pas la tomate.",
+       "Ajoute le bœuf, écrase-le, laisse-le colorer sans remuer 3 min — une viande qui grille développe des arômes qu'une viande bouillie n'aura jamais.",
+       "Verse les tomates, l'ail, l'origan, sale, mijote 15 min à petit feu.",
+       "Cuis 200 g de pâtes une minute de moins que le paquet et finis-les dans la sauce avec une louche d'eau de cuisson : l'amidon lie la sauce à la pâte.",
+       "Salade en vinaigrette simple, parmesan râpé dessus."],
+   tip:"Ne jette jamais l'eau de cuisson avant la fin du plat. C'est le liant le moins cher qui existe."},
+  {n:"Tacos de bœuf épicé, poivrons et guacamole minute",t:"30 min",p:13,k:980,pr:42,
+   f:"BŒUF 23 % + POIVRON 23 % + AVOCAT 16 %",
+   sd:"Viande hachée épicée, assemblage à table",
+   rp:[["LÉGUMES",290,90],["PROTÉINES",110,330],["FÉCULENTS",90,270],["MATIÈRES GRASSES",140,290]],
+   tags:[["Convivial",1],["Viande",0]],
+   w:"On pose tout au milieu de la table et chacun compose. Fin de semaine décontractée.",
+   ing:[["BOU","bœuf haché",300,"g",0],["LEG","poivrons rouges",2,"",0],["LEG","oignons",1,"",0],
+        ["LEG","avocats",2,"",0],["LEG","citrons verts",1,"",0],["LEG","tomates",2,"",0],
+        ["LEG","coriandre (bouquet)",1,"",0],["CRE","crème fraîche",1,"pot",0],
+        ["EPI","tortillas de blé",1,"paquet",0],["P","cumin, paprika",0,"",1]],
+   et:["Fais colorer le bœuf à feu vif avec les épices, sans remuer au début. Réserve.",
+       "Dans la même poêle, fais sauter poivrons et oignon en lanières 8 min à feu vif : ils doivent rester croquants.",
+       "Écrase les avocats à la fourchette avec citron vert, sel et coriandre. À la fourchette, pas au blender : un guacamole mixé devient une mousse sans texture.",
+       "Réchauffe les tortillas 20 secondes par face à sec — c'est ce qui les rend souples au lieu de cassantes.",
+       "Sers tous les éléments séparément."],
+   tip:"Le noyau dans le guacamole ne l'empêche pas de noircir. Le citron et un film au contact, si."}]}
+]};
+
+/* --- état ------------------------------------------------------ */
+let DATA = Store.get("semaine", null) || DEFAUT;
+let sel  = Store.get("sel", null);
+let coche = Store.get("coche", null) || {};
+if(!Array.isArray(sel) || sel.length !== DATA.jours.length) sel = DATA.jours.map(()=>0);
+function save(){ Store.set("sel", sel); Store.set("coche", coche); }
+
+const $ = id => document.getElementById(id);
+const n2 = n => String(n).padStart(2,"0");
+
+/* --- menu ------------------------------------------------------ */
+function renderMenu(){
+  $("fiches").innerHTML = DATA.jours.map((d,i)=>{
+    const o = d.opts[sel[i]];
+    return '<article class="fiche">'
+      + '<div class="ref"><b>Jour ' + n2(i+1) + '</b> ' + d.j
+      +   '<span class="t mono">' + (o.t||'') + '</span></div>'
+      + '<p class="formule">' + (o.f || o.n.toUpperCase()) + '</p>'
+      + '<p class="nom">' + o.n + '</p>'
+      + (o.sd ? '<p class="desc">' + o.sd + '</p>' : '')
+      + (o.w  ? '<p class="usage">' + o.w + '</p>' : '')
+      + '<div class="data">'
+      +   '<span><b>' + (o.k||'—') + '</b>kcal</span>'
+      +   '<span><b>' + (o.pr||'—') + '</b>g prot.</span>'
+      +   '<span><b>' + (o.p ? o.p+',00' : '—') + '</b>€</span>'
+      + '</div>'
+      + (d.opts.length>1
+          ? '<button class="sub" data-i="'+i+'">Substituer'
+            + '<i class="mono">' + n2(sel[i]+1) + ' / ' + n2(d.opts.length) + '</i></button>'
+          : '')
+      + '</article>';
+  }).join('');
+
+  $("fiches").querySelectorAll('.sub').forEach(b=>b.addEventListener('click',()=>{
+    const i = +b.dataset.i;
+    sel[i] = (sel[i]+1) % DATA.jours[i].opts.length;
+    save(); renderAll(); flash('Formule substituée · liste recalculée');
+  }));
+
+  const prix = DATA.jours.reduce((s,d,i)=>s+(d.opts[sel[i]].p||0),0);
+  $("spec").textContent = (DATA.semaine||'') + ' — 2 pers. — ' + prix + ' €';
+
+  const veg = DATA.jours.filter((d,i)=>(d.opts[sel[i]].tags||[]).some(t=>t[0]==='Végétarien')).length;
+  const leg = new Set();
+  DATA.jours.forEach((d,i)=>d.opts[sel[i]].ing.forEach(g=>{ if(g[0]==='LEG') leg.add(g[1]); }));
+  const ks = DATA.jours.map((d,i)=>d.opts[sel[i]].k).filter(Boolean);
+  const moy = ks.length ? Math.round(ks.reduce((a,b)=>a+b,0)/ks.length/10)*10 : 0;
+  $("bilan").innerHTML =
+      'Composition — <b>' + veg + '</b> dîners végétariens · <b>' + leg.size + '</b> produits frais<br>'
+    + 'Densité — <b>' + moy + ' kcal</b> par portion en moyenne, ±15 %<br>'
+    + 'Contraintes — sans four · 40 min maximum';
+}
+
+/* --- courses --------------------------------------------------- */
+function renderCourses(){
+  const agg = {};
+  DATA.jours.forEach((d,i)=>d.opts[sel[i]].ing.forEach(g=>{
+    const [r,n,q,u,uniq] = g;
+    if(r === 'P') return;
+    const k = r+'|'+n+'|'+u;
+    if(!agg[k]) agg[k] = {r,n,q:0,u,uniq};
+    agg[k].q = uniq ? Math.max(agg[k].q,q) : agg[k].q + q;
+  }));
+  const parR = {};
+  Object.values(agg).forEach(it=>{ (parR[it.r] = parR[it.r]||[]).push(it); });
+
+  let h = '';
+  ORDRE.forEach(r=>{
+    if(!parR[r]) return;
+    h += '<div class="rayon">' + (RAYONS[r]||r)
+       + '<i>' + n2(parR[r].length) + '</i></div><ul class="liste">';
+    parR[r].sort((a,b)=>a.n.localeCompare(b.n,'fr')).forEach(it=>{
+      const k = it.r+'-'+it.n;
+      h += '<li><label><input type="checkbox" data-k="'+k+'"'+(coche[k]?' checked':'')+'>'
+         + '<span class="txt">'+it.n+'</span>'
+         + '<span class="q">'+(it.q ? it.q+(it.u?' '+it.u:'') : '—')+'</span></label></li>';
+    });
+    h += '</ul>';
+  });
+  $("courses").innerHTML = h;
+  document.querySelectorAll('#courses input').forEach(b=>
+    b.addEventListener('change',()=>{ coche[b.dataset.k]=b.checked; save(); compte(); }));
+  compte();
+}
+function compte(){
+  const b = [...document.querySelectorAll('#courses input')];
+  const f = b.filter(x=>x.checked).length;
+  $("cpt").textContent = n2(f) + ' / ' + n2(b.length);
+  $("prog").style.width = (b.length ? f/b.length*100 : 0) + '%';
+}
+
+/* --- répartition dans l'assiette -------------------------------
+   Deux lectures d'un même plat, qui ne disent pas la même chose :
+   ce qui remplit l'assiette (la masse) et d'où vient l'énergie
+   (les calories). L'écart entre les deux est l'information utile.
+
+   Les poids sont des poids CUITS estimés : un riz pèse 2,6 fois son
+   poids sec, une viande en perd 28 %. Comparer des poids crus à la
+   règle du demi-quart-quart n'aurait aucun sens.
+   ---------------------------------------------------------------- */
+const ROLES = {
+  "LÉGUMES":"#46603F", "PROTÉINES":"#9C5A34", "FÉCULENTS":"#C9A24B",
+  "MATIÈRES GRASSES":"#8C8578", "ASSAISONNEMENT":"#B5AFA2"
+};
+
+function secteur(cx,cy,r,a0,a1){
+  const px = a => [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+  const [x0,y0] = px(a0), [x1,y1] = px(a1);
+  const grand = (a1-a0) > Math.PI ? 1 : 0;
+  return `M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} `
+       + `A${r},${r} 0 ${grand},1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`;
+}
+
+function repartition(rp){
+  const tg = rp.reduce((s,x)=>s+x[1],0) || 1;
+  const tk = rp.reduce((s,x)=>s+x[2],0) || 1;
+  const cx = 110, cy = 66;
+  const teinte = n => ROLES[n] || "#8C8578";
+
+  let s = '<svg viewBox="0 0 220 172" role="img" '
+        + 'aria-label="Répartition en masse et en calories">';
+
+  // l'assiette : la place que chaque famille occupe réellement
+  s += `<circle class="plateau" cx="${cx}" cy="${cy}" r="60"/>`;
+  let a = -Math.PI/2;
+  rp.forEach(x=>{
+    const a2 = a + x[1]/tg*2*Math.PI;
+    s += `<path d="${secteur(cx,cy,52,a,a2)}" fill="${teinte(x[0])}" fill-opacity=".85"/>`;
+    s += `<path class="sep" d="M${cx},${cy} `
+      +  `L${(cx+52*Math.cos(a)).toFixed(1)},${(cy+52*Math.sin(a)).toFixed(1)}"/>`;
+    a = a2;
+  });
+  s += `<circle class="plateau" cx="${cx}" cy="${cy}" r="52"/>`;
+
+  // la barre : la même assiette, mais en calories
+  s += '<text x="26" y="137" font-size="7.5" letter-spacing="1.5" fill="currentColor" '
+    +  'fill-opacity=".45">ÉNERGIE</text>';
+  let x0 = 26;
+  rp.forEach(v=>{
+    const w = v[2]/tk*168;
+    s += `<rect x="${x0.toFixed(1)}" y="142" width="${w.toFixed(1)}" height="9" `
+      +  `fill="${teinte(v[0])}" fill-opacity=".85"/>`;
+    x0 += w;
+  });
+  s += '<text x="26" y="166" font-size="8.5" fill="currentColor" fill-opacity=".45" '
+    +  'font-family="ui-monospace,Menlo,monospace">'
+    +  `${Math.round(tg)} G · ${Math.round(tk)} KCAL PAR PORTION</text>`;
+  s += '</svg>';
+
+  s += '<ul class="leg">' + rp.map(x=>
+        `<li><span class="sw" style="background:${teinte(x[0])}"></span>`
+      + `${x[0]}<span class="pc">${x[1]} g · ${x[2]} kcal · ${Math.round(x[2]/tk*100)} %</span></li>`
+      ).join('') + '</ul>';
+
+  // la lecture : ce que ces chiffres disent, comparés à l'assiette de référence
+  const pm = n => { const e = rp.find(x=>x[0]===n); return e ? e[1]/tg*100 : 0; };
+  const pk = n => { const e = rp.find(x=>x[0]===n); return e ? e[2]/tk*100 : 0; };
+  const lg = Math.round(pm("LÉGUMES")), gr = Math.round(pk("MATIÈRES GRASSES"));
+  let l;
+  if(lg >= 45)      l = `<b>${lg} % de légumes</b> dans l'assiette : conforme à la moitié visée.`;
+  else if(lg >= 30) l = `<b>${lg} % de légumes</b> contre 50 % visés. Une salade verte à côté rétablit l'équilibre.`;
+  else              l = `<b>${lg} % de légumes</b> : nettement sous la cible. Prévois une belle salade, ou double les légumes de la recette.`;
+  if(gr >= 30) l += ` Les matières grasses ne pèsent presque rien sur la balance mais portent <b>${gr} % des calories</b> : c'est là qu'est la densité du plat.`;
+  s += `<p class="lecture">${l}</p>`;
+
+  return `<div class="mont">${s}</div>`;
+}
+
+
+/* --- recettes -------------------------------------------------- */
+function renderRecettes(){
+  $("recettes").innerHTML = DATA.jours.map((d,i)=>{
+    const o = d.opts[sel[i]];
+    const ing = o.ing.map(g=>
+      '<li>'+g[1]+'<span>'+(g[2] ? g[2]+(g[3]?' '+g[3]:'') : '—')+'</span></li>').join('');
+    return '<details class="bloc"><summary>'
+      + '<span class="idx">'+n2(i+1)+'</span><span class="ttl">'+o.n+'</span></summary>'
+      + '<div class="corps">'
+      + '<h4>Composition · 2 portions</h4><ul>'+ing+'</ul>'
+      + (o.k ? '<p class="nutri">≈ '+o.k+' kcal · '+o.pr+' g protéines par portion<br>'
+              +'Table Ciqual — ANSES · marge ±15 %</p>' : '')
+      + '<h4>Protocole — '+o.t+'</h4><ol>'+(o.et||[]).map(e=>'<li>'+e+'</li>').join('')+'</ol>'
+      + (o.rp ? '<h4>Répartition dans l\'assiette</h4>' + repartition(o.rp) : '')
+      + (o.tip ? '<div class="note"><b>À retenir</b>'+o.tip+'</div>' : '')
+      + '</div></details>';
+  }).join('');
+}
+
+/* --- gestes ---------------------------------------------------- */
+const GESTES = [
+ ["Sécher ce qu'on veut faire dorer",
+  "Une surface humide ne dore pas : l'eau doit d'abord s'évaporer, et pendant ce temps l'aliment cuit à la vapeur dans sa propre humidité. Passe systématiquement la viande, le poisson et même les légumes lavés au papier absorbant. C'est le geste le plus rentable de toute la cuisine : trente secondes d'effort pour la différence entre gris et doré."],
+ ["Ne jamais surcharger la poêle",
+  "Chaque aliment ajouté fait baisser la température et libère de l'eau. Au-delà d'une certaine densité, la poêle ne redevient plus assez chaude et tout se met à bouillir. La règle : il faut voir le fond entre les morceaux. Si ça ne rentre pas, fais en deux fois."],
+ ["Saler par étapes, pas à la fin",
+  "Le sel a besoin de temps pour pénétrer. Ajouté en fin de cuisson, il reste en surface et donne une impression de plat à la fois salé et fade. Sale chaque ingrédient au moment où tu l'ajoutes : tu utiliseras moins de sel au total pour un résultat plus assaisonné."],
+ ["Chauffer les épices dans le gras",
+  "La plupart des molécules aromatiques des épices sont solubles dans l'huile, pas dans l'eau. Jetées dans une sauce déjà liquide, elles ne libèrent qu'une fraction de leur parfum. Trente secondes dans le corps gras chaud, juste avant d'ajouter le liquide, et le même curry change de dimension."],
+ ["Tout préparer avant d'allumer le feu",
+  "C'est la mise en place. Tant que rien ne chauffe, tu as le temps ; dès que la poêle est chaude, tu n'en as plus. La quasi-totalité des ratés domestiques viennent de là : l'ail qui brûle pendant qu'on épluche l'oignon."],
+ ["Couper régulier avant de couper joli",
+  "Des morceaux de tailles différentes cuisent à des vitesses différentes : quand les gros sont à point, les petits sont en bouillie. La régularité compte davantage que la finesse. C'est pourquoi une ratatouille en dés d'un centimètre cuit en vingt minutes là où une ratatouille approximative en met une heure."],
+ ["Garder l'eau de cuisson des pâtes",
+  "Elle est chargée d'amidon, qui est un liant. Une louche versée dans la sauce fait accrocher la sauce à la pâte au lieu de la laisser glisser au fond de l'assiette. C'est le seul écart entre des pâtes correctes et des pâtes de restaurant."],
+ ["Laisser reposer les viandes",
+  "Pendant la cuisson, les fibres se contractent et chassent le jus vers le centre. Couper tout de suite le laisse s'échapper dans l'assiette. Cinq minutes hors du feu, à couvert, suffisent à le redistribuer. Une viande reposée est plus juteuse qu'une viande servie brûlante."],
+ ["Corriger avec de l'acide, pas avec du sel",
+  "Quand un plat paraît plat sans qu'on sache pourquoi, le réflexe est d'ajouter du sel. Neuf fois sur dix, ce qui manque est l'acidité. Un trait de citron ou de vinaigre en fin de cuisson réveille l'ensemble sans rendre le plat acide — il rend les autres saveurs perceptibles."],
+ ["Finir par quelque chose de cru",
+  "Herbes ciselées, zeste, filet d'huile crue, oignon rouge, graines torréfiées. La cuisson aplatit les arômes volatils ; un élément cru ajouté au dernier moment les réintroduit et apporte un contraste de texture. C'est ce qui distingue un plat fini d'un plat simplement cuit."]
+];
+function renderGestes(){
+  $("gestes").innerHTML = GESTES.map((g,i)=>
+    '<details class="bloc"><summary><span class="idx">'+n2(i+1)+'</span>'
+    + '<span class="ttl">'+g[0]+'</span></summary>'
+    + '<div class="corps"><p style="margin:0;font-size:15px;line-height:1.65">'+g[1]+'</p></div>'
+    + '</details>').join('');
+}
+
+function renderAll(){ renderMenu(); renderCourses(); renderRecettes(); renderGestes(); }
+
+/* --- réglages --------------------------------------------------- */
+function dire(txt, ok){
+  const m = $("msg"); m.textContent = txt; m.className = 'msg ' + (ok?'ok':'ko');
+  setTimeout(()=>{ m.className='msg'; }, 6000);
+}
+/* Validation : renvoie null si tout va bien, sinon le message d'erreur. */
+function valider(obj){
+  if(!obj || !Array.isArray(obj.jours) || !obj.jours.length)
+    return "Il manque la liste des jours.";
+  for(const d of obj.jours){
+    if(!d.j || !Array.isArray(d.opts) || !d.opts.length)
+      return "Un jour est mal formé : nom et options requis.";
+    for(const o of d.opts)
+      if(!o.n || !Array.isArray(o.ing))
+        return "Un plat est mal formé : nom et ingrédients requis.";
+  }
+  return null;
+}
+
+function appliquer(obj, msg){
+  DATA = obj; sel = DATA.jours.map(()=>0); coche = {};
+  Store.set("semaine", DATA); save();
+  $("json").value = '';
+  renderAll();
+  dire(msg || "Semaine chargée.", true);
+  document.querySelector('nav button[data-p="menu"]').click();
+}
+
+function chargerTexte(raw, provenance){
+  raw = (raw||'').trim();
+  if(!raw) return dire("Rien à charger.", false);
+  let obj;
+  try{ obj = JSON.parse(raw); }
+  catch(e){ return dire("Bloc invalide : "+e.message, false); }
+  const err = valider(obj);
+  if(err) return dire(err, false);
+  appliquer(obj, provenance);
+}
+
+$("charger").addEventListener('click',()=> chargerTexte($("json").value));
+
+/* --- le presse-papiers ------------------------------------------
+   navigator.clipboard.readText() exige un geste de l'utilisateur et
+   déclenche une confirmation iOS. D'où le bouton plutôt qu'une
+   lecture automatique. */
+$("coller").addEventListener('click', async ()=>{
+  if(!navigator.clipboard || !navigator.clipboard.readText)
+    return dire("Ce navigateur ne donne pas accès au presse-papiers. Colle dans le champ.", false);
+  try{
+    const t = await navigator.clipboard.readText();
+    chargerTexte(t, "Semaine chargée depuis le presse-papiers.");
+  }catch(e){
+    dire("Accès au presse-papiers refusé. Colle dans le champ ci-dessous.", false);
+  }
+});
+
+$("claude").addEventListener('click',()=>{
+  window.open('https://claude.ai/new', '_blank', 'noopener');
+});
+
+/* --- chargement par lien ----------------------------------------
+   Le menu voyage dans le fragment (#w=…), jamais dans la requête :
+   un fragment n'est pas envoyé au serveur et n'est pas mis en cache
+   par le service worker.
+   Format : un caractère de tête ('z' = gzip, 'p' = brut) suivi du
+   JSON encodé en base64 sans padding, adapté aux URL.
+   ---------------------------------------------------------------- */
+function b64uDecode(str){
+  const b = atob(str.replace(/-/g,'+').replace(/_/g,'/'));
+  const u = new Uint8Array(b.length);
+  for(let i=0;i<b.length;i++) u[i] = b.charCodeAt(i);
+  return u;
+}
+async function depaqueter(charge){
+  const tag = charge[0], data = b64uDecode(charge.slice(1));
+  if(tag === 'z'){
+    if(typeof DecompressionStream !== 'function')
+      throw new Error("Ce navigateur est trop ancien pour les liens compressés.");
+    const ds = new DecompressionStream('gzip');
+    const w = ds.writable.getWriter(); w.write(data); w.close();
+    const buf = new Uint8Array(await new Response(ds.readable).arrayBuffer());
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  if(tag === 'p') return JSON.parse(new TextDecoder().decode(data));
+  throw new Error("Lien d'un format inconnu.");
+}
+async function lireLien(){
+  const h = location.hash || '';
+  if(!h.startsWith('#w=')) return;
+  const charge = h.slice(3);
+  history.replaceState(null, '', location.pathname + location.search);
+  try{
+    const obj = await depaqueter(charge);
+    const err = valider(obj);
+    if(err){ dire(err, false); return; }
+    appliquer(obj, "Semaine chargée depuis le lien.");
+  }catch(e){
+    document.querySelector('nav button[data-p="reglages"]').click();
+    dire("Lien illisible : " + e.message, false);
+  }
+}
+window.addEventListener('hashchange', lireLien);
+$("export").addEventListener('click',()=>{
+  const b = new Blob([JSON.stringify({semaine:DATA,sel,coche},null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'popote-sauvegarde.json'; a.click();
+  URL.revokeObjectURL(a.href); flash('Sauvegarde exportée');
+});
+$("effacer").addEventListener('click',()=>{
+  if(!confirm("Effacer la semaine, les substitutions et les cases cochées ?")) return;
+  Store.del("semaine"); Store.del("sel"); Store.del("coche");
+  DATA = DEFAUT; sel = DATA.jours.map(()=>0); coche = {};
+  renderAll(); flash('Remise à zéro effectuée');
+});
+$("raz").addEventListener('click',()=>{ coche = {}; save(); renderCourses(); });
+
+/* --- divers ------------------------------------------------------ */
+let ft;
+function flash(m){
+  const f = $("flash"); f.textContent = m; f.classList.add('on');
+  clearTimeout(ft); ft = setTimeout(()=>f.classList.remove('on'), 2000);
+}
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+    btn.classList.add('on');
+    $('p-'+btn.dataset.p).classList.add('on');
+    window.scrollTo(0,0);
+  });
+});
+$("ver").textContent = 'Popote — version ' + VERSION + ' · '
+  + (Store.set('t',1) ? 'mémoire active' : 'mémoire indisponible');
+Store.del('t');
+
+renderAll();
+lireLien();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>

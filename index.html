@@ -6,7 +6,8 @@
 <title>Popote</title>
 
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#F2F1EC">
+<meta name="theme-color" content="#EEF0EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E100E" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,520 +17,479 @@
 
 <style>
 /* ============================================================
-   POPOTE — DIRECTION ARTISTIQUE
-   Laboratoire + potager. Référence : The Ordinary.
-   Le nom du plat est sa formule. Les données sont brutes.
-   Aucun arrondi, aucune ombre, aucune icône pleine.
-   La structure est faite de filets, pas de cartes.
+   POPOTE 4 — interface façon iOS
+   Le fond porte la couleur, les cartes sont des matières
+   translucides, et seuls les éléments flottants — la barre du
+   haut, la barre d'onglets, les notifications — sont en vrai verre
+   dépoli. C'est ce que fait iOS : le flou n'a de sens que là où le
+   contenu défile dessous. Le mettre sur chaque carte coûterait cher
+   au processeur graphique du téléphone pour un effet invisible.
    ============================================================ */
 :root{
-  --papier:#F2F1EC;
-  --encre:#16181A;
-  --chloro:#46603F;      /* vert potager désaturé — usage fonctionnel */
-  --terre:#9C5A34;       /* terre cuite désaturée — second signal */
-  --filet:#D6D4CC;
-  --gris:#7C7970;
-  --voile:#E9E7E1;
+  --fond:#EEF0EA;
+  --materiau:rgba(255,255,255,.6);
+  --materiau-fort:rgba(255,255,255,.84);
+  --verre:rgba(250,251,248,.58);
+  --liseré:rgba(255,255,255,.75);
+  --texte:#1C1F1B;
+  --texte-2:rgba(28,31,27,.64);
+  --texte-3:rgba(28,31,27,.44);
+  --sep:rgba(28,31,27,.10);
+  --remplissage:rgba(28,31,27,.06);
+  --teinte:#46603F;
+  --teinte-douce:rgba(70,96,63,.13);
+  --sur-teinte:#FFFFFF;
+  --terre:#9C5A34;
+  --terre-douce:rgba(156,90,52,.13);
+  --or:#C9A24B;
+  --ombre:0 1px 2px rgba(40,50,35,.05), 0 8px 28px rgba(40,50,35,.08);
+  --ombre-flottante:0 2px 6px rgba(30,40,25,.08), 0 18px 48px rgba(30,40,25,.18);
+  --rayon:22px;
+  --rayon-moyen:14px;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --papier:#101110; --encre:#E9E8E3; --chloro:#8FA987; --terre:#C58A62;
-    --filet:#2B2C2A;  --gris:#8B8880;  --voile:#191A18;
+    --fond:#0E100E;
+    --materiau:rgba(38,42,37,.62);
+    --materiau-fort:rgba(46,50,45,.86);
+    --verre:rgba(30,33,29,.55);
+    --liseré:rgba(255,255,255,.08);
+    --texte:#F2F3EF;
+    --texte-2:rgba(242,243,239,.66);
+    --texte-3:rgba(242,243,239,.42);
+    --sep:rgba(255,255,255,.09);
+    --remplissage:rgba(255,255,255,.07);
+    --teinte:#8FBF8A;
+    --teinte-douce:rgba(143,191,138,.16);
+    --sur-teinte:#0E100E;
+    --terre:#D59A72;
+    --terre-douce:rgba(213,154,114,.16);
+    --or:#D9B865;
+    --ombre:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.25);
+    --ombre-flottante:0 2px 6px rgba(0,0,0,.35), 0 18px 48px rgba(0,0,0,.5);
   }
 }
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{
-  margin:0;background:var(--papier);color:var(--encre);
-  font:400 16px/1.55 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
-  padding-bottom:calc(70px + env(safe-area-inset-bottom));
-  -webkit-font-smoothing:antialiased;
+  margin:0;min-height:100vh;color:var(--texte);background:var(--fond);
+  font:400 17px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.01em;
+  padding-bottom:calc(110px + env(safe-area-inset-bottom));
+}
+button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer}
+
+/* Le fond : trois halos de couleur fixes. C'est lui qui donne
+   au verre quelque chose à flouter. */
+.fond{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.fond i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55}
+.fond i:nth-child(1){width:70vw;height:70vw;left:-20vw;top:-10vw;background:#B9CFB0}
+.fond i:nth-child(2){width:60vw;height:60vw;right:-25vw;top:35vh;background:#E8D7AE}
+.fond i:nth-child(3){width:55vw;height:55vw;left:-10vw;bottom:-15vw;background:#E3C4AE}
+@media (prefers-color-scheme:dark){
+  .fond i{opacity:.22}
+  .fond i:nth-child(1){background:#3D5C3A}
+  .fond i:nth-child(2){background:#6B5A2E}
+  .fond i:nth-child(3){background:#6A3F28}
 }
 
-/* --- primitives typographiques ------------------------------ */
-.cap{ text-transform:uppercase; letter-spacing:.15em; font-weight:600; }
-.mono{ font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
-       font-variant-numeric:tabular-nums; }
-.rule{ border:0;border-top:1px solid var(--filet);margin:0; }
+/* --- barre du haut : apparaît quand le grand titre sort de l'écran */
+.barre{
+  position:fixed;top:0;left:0;right:0;z-index:40;
+  padding:calc(env(safe-area-inset-top) + 10px) 20px 10px;
+  text-align:center;font-weight:600;font-size:17px;
+  background:var(--verre);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:.5px solid var(--sep);
+  opacity:0;transform:translateY(-6px);pointer-events:none;
+  transition:opacity .22s ease, transform .22s ease;
+}
+.barre.visible{opacity:1;transform:none}
 
-/* --- en-tête ------------------------------------------------- */
-header{
-  position:sticky;top:0;z-index:20;background:var(--papier);
-  padding:calc(20px + env(safe-area-inset-top)) 20px 12px;
-  border-bottom:1px solid var(--encre);
-}
-.wordmark{
-  display:flex;align-items:center;gap:9px;
-  font-size:15px;text-transform:uppercase;letter-spacing:.34em;font-weight:600;
-}
-.wordmark svg{width:15px;height:15px;stroke:var(--chloro);fill:none;
-  stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
-.specline{
-  margin-top:7px;font-size:10.5px;letter-spacing:.09em;color:var(--gris);
-  text-transform:uppercase;
-}
+main{max-width:620px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 16px 0}
+.panel{display:none}
+.panel.on{display:block;animation:entree .28s ease}
+@keyframes entree{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-main{max-width:640px;margin:0 auto;padding:0 20px 40px}
-.panel{display:none}.panel.on{display:block}
+h1.titre{margin:14px 4px 2px;font-size:34px;line-height:1.12;font-weight:700;letter-spacing:-.025em}
+.sous-titre{margin:0 4px 20px;color:var(--texte-2);font-size:15px}
+h2.entete{
+  margin:26px 4px 10px;font-size:20px;font-weight:700;letter-spacing:-.02em;
+  display:flex;align-items:baseline;gap:8px;
+}
+h2.entete small{font-size:15px;font-weight:400;color:var(--texte-3);letter-spacing:-.01em}
+.legende-liste{margin:24px 18px 7px;font-size:13px;color:var(--texte-2);text-transform:uppercase;letter-spacing:.02em}
+.pied{margin:10px 18px 0;font-size:13px;color:var(--texte-3);line-height:1.45}
 
-/* --- fiche plat ---------------------------------------------- */
-.fiche{padding:26px 0 24px;border-bottom:1px solid var(--filet)}
-.fiche:last-of-type{border-bottom:1px solid var(--encre)}
-.ref{
-  display:flex;align-items:baseline;gap:10px;
-  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gris);
+/* --- matière commune ------------------------------------------- */
+.carte{
+  background:var(--materiau);border:.5px solid var(--liseré);border-radius:var(--rayon);
+  box-shadow:var(--ombre);padding:18px;margin-bottom:12px;
 }
-.ref b{color:var(--encre);font-weight:600}
-.ref .t{margin-left:auto;letter-spacing:.1em}
-.formule{
-  margin:14px 0 0;font-size:14.5px;line-height:1.45;letter-spacing:.02em;
-  text-transform:uppercase;font-weight:500;
-  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+.groupe{                                   /* liste groupée à la Réglages */
+  background:var(--materiau);border:.5px solid var(--liseré);border-radius:var(--rayon-moyen);
+  box-shadow:var(--ombre);overflow:hidden;
 }
-.formule em{font-style:normal;color:var(--gris)}
-.nom{margin:11px 0 3px;font-size:16px;font-weight:400;line-height:1.4}
-.desc{margin:0;font-size:13px;color:var(--gris);line-height:1.5}
-.usage{margin:11px 0 0;font-size:13px;color:var(--gris);line-height:1.5;
-  padding-left:12px;border-left:1px solid var(--filet)}
+.ligne{
+  display:flex;align-items:center;gap:12px;min-height:50px;padding:11px 16px;
+  position:relative;font-size:17px;
+}
+.ligne + .ligne::before{content:"";position:absolute;top:0;right:0;left:16px;border-top:.5px solid var(--sep)}
+.ligne .val{margin-left:auto;color:var(--texte-2);font-size:15px;font-variant-numeric:tabular-nums;text-align:right}
+.ligne.bouton{width:100%;background:none;border:0;text-align:left;color:var(--teinte)}
+.ligne.bouton:active{background:var(--remplissage)}
+.ligne.danger{color:#D0453A}
+@media (prefers-color-scheme:dark){.ligne.danger{color:#FF6B5E}}
 
-.data{
-  display:flex;align-items:center;gap:0;margin-top:18px;
-  border-top:1px solid var(--filet);border-bottom:1px solid var(--filet);
+/* --- boutons --------------------------------------------------- */
+.bt{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  border:0;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:600;
+  background:var(--remplissage);color:var(--texte);
+  transition:transform .12s ease, background .2s ease;
 }
-.data span{
-  flex:1;padding:9px 0;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--gris);border-right:1px solid var(--filet);text-align:center;
-  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
-}
-.data span:last-child{border-right:0}
-.data span b{display:block;color:var(--encre);font-weight:600;font-size:13px;
-  letter-spacing:.03em;margin-bottom:1px}
+.bt:active{transform:scale(.96)}
+.bt.plein{background:var(--teinte);color:var(--sur-teinte)}
+.bt.teinte{background:var(--teinte-douce);color:var(--teinte)}
+.bt[disabled]{opacity:.38;pointer-events:none}
+.bt svg{width:17px;height:17px;flex:0 0 auto}
+.rangee{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rangee .bt{flex:1 1 auto}
 
-.sub{
-  margin-top:14px;width:100%;background:none;color:var(--encre);
-  border:1px solid var(--encre);padding:11px 14px;cursor:pointer;
-  font-family:inherit;font-weight:600;font-size:10.5px;line-height:1;letter-spacing:.18em;text-transform:uppercase;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+/* --- carte plat ------------------------------------------------- */
+.plat .tete{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texte-2)}
+.plat .tete .jour{font-weight:600;color:var(--teinte)}
+.plat .tete .duree{margin-left:auto;font-variant-numeric:tabular-nums}
+.plat h3{margin:6px 0 4px;font-size:20px;line-height:1.28;font-weight:650;letter-spacing:-.02em}
+.formule{margin:0;font-size:13px;color:var(--texte-3);font-variant-numeric:tabular-nums;line-height:1.45}
+.puces{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.puce{
+  font-size:13px;font-weight:600;padding:5px 10px;border-radius:999px;
+  background:var(--remplissage);color:var(--texte-2);font-variant-numeric:tabular-nums;
 }
-.sub:active{background:var(--encre);color:var(--papier)}
-.sub i{font-style:normal;letter-spacing:.1em;color:var(--gris);font-weight:500}
-.sub:active i{color:var(--papier)}
+.puce.vert{background:var(--teinte-douce);color:var(--teinte)}
+.puce.terre{background:var(--terre-douce);color:var(--terre)}
+.usage{margin:12px 0 0;font-size:15px;color:var(--texte-2);line-height:1.45}
 
-.bilan{
-  margin:26px 0 0;padding:16px 0 0;font-size:10.5px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--gris);line-height:2;
-  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+/* le gros rond « cuisiné » */
+.coche{
+  width:30px;height:30px;flex:0 0 auto;border-radius:50%;
+  border:2px solid var(--texte-3);background:transparent;display:grid;place-items:center;
+  transition:all .2s ease;padding:0;
 }
-.bilan b{color:var(--encre);font-weight:600}
+.coche svg{width:16px;height:16px;opacity:0;transform:scale(.6);transition:all .2s ease}
+.coche.oui{background:var(--teinte);border-color:var(--teinte)}
+.coche.oui svg{opacity:1;transform:none}
+.coche svg path{stroke:var(--sur-teinte)}
 
-/* --- courses -------------------------------------------------- */
-.jauge{
-  display:flex;align-items:center;gap:14px;padding:16px 0;
-  border-bottom:1px solid var(--encre);
-}
-.jauge .n{font-size:11px;letter-spacing:.12em;font-weight:600;white-space:nowrap;
-  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace}
-.piste{flex:1;height:1px;background:var(--filet);position:relative}
-.piste i{position:absolute;left:0;top:-1px;height:3px;background:var(--chloro);
-  width:0;transition:width .3s}
-.lien{background:none;border:0;padding:4px 0;cursor:pointer;color:var(--gris);
-  font-family:inherit;font-weight:600;font-size:10px;line-height:1;letter-spacing:.14em;text-transform:uppercase;
-  border-bottom:1px solid var(--filet)}
+/* plat cuisiné : version compacte */
+.plat.fait{padding:14px 16px}
+.plat.fait .rang{display:flex;align-items:center;gap:12px}
+.plat.fait .rang .titres{flex:1;min-width:0}
+.plat.fait h3{font-size:17px;margin:0;font-weight:600}
+.plat.fait .quand{font-size:13px;color:var(--texte-2);margin-top:1px}
+.verdict-puce{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;color:#fff;white-space:nowrap}
+.question{margin:14px 0 8px;font-size:15px;font-weight:600}
 
-.rayon{
-  margin:28px 0 0;padding-bottom:7px;border-bottom:1px solid var(--encre);
-  font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
-  display:flex;align-items:baseline;
+/* contrôle segmenté iOS */
+.segment{
+  display:flex;padding:3px;border-radius:12px;background:var(--remplissage);gap:2px;
 }
-.rayon i{margin-left:auto;font-style:normal;color:var(--gris);font-weight:400;
-  letter-spacing:.1em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-ul.liste{list-style:none;margin:0;padding:0}
-ul.liste li{border-bottom:1px solid var(--filet)}
-ul.liste label{display:flex;align-items:center;gap:14px;padding:14px 2px;cursor:pointer;
-  font-size:15px;user-select:none}
-ul.liste input{
-  appearance:none;-webkit-appearance:none;flex:0 0 auto;width:15px;height:15px;
-  border:1px solid var(--encre);margin:0;position:relative;background:transparent;
+.segment button{
+  flex:1;border:0;background:transparent;padding:8px 4px;border-radius:9px;
+  font-size:14px;font-weight:600;color:var(--texte-2);transition:all .18s ease;white-space:nowrap;
 }
-ul.liste input:checked{background:var(--chloro);border-color:var(--chloro)}
-ul.liste input:checked::after{
-  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
-  border:solid var(--papier);border-width:0 1.5px 1.5px 0;transform:rotate(43deg);
-}
-ul.liste input:checked ~ .txt{color:var(--gris);text-decoration:line-through;
-  text-decoration-thickness:1px}
-.txt{flex:1;transition:color .15s}
-.q{margin-left:auto;color:var(--gris);font-size:12px;letter-spacing:.06em;
-  white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-ul.liste input:checked ~ .q{opacity:.45}
+.segment button.on{background:var(--materiau-fort);color:var(--texte);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.segment.verdicts button.on[data-v="encore"]{background:#46603F;color:#fff}
+.segment.verdicts button.on[data-v="bien"]  {background:#6E8A68;color:#fff}
+.segment.verdicts button.on[data-v="bof"]   {background:#B07445;color:#fff}
+.segment.verdicts button.on[data-v="jamais"]{background:#8A3E24;color:#fff}
 
-/* --- accordéons (recettes, gestes) ---------------------------- */
-details.bloc{border-bottom:1px solid var(--filet)}
-details.bloc summary{
-  padding:18px 2px;cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:12px;
+.champ{
+  width:100%;margin-top:10px;border:0;border-radius:12px;background:var(--remplissage);
+  padding:12px 14px;font-size:16px;
 }
-details.bloc summary::-webkit-details-marker{display:none}
-details.bloc summary .idx{
-  font-size:10px;letter-spacing:.14em;color:var(--gris);flex:0 0 auto;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;padding-top:3px;
-}
-details.bloc summary .ttl{font-size:15px;line-height:1.4}
-details.bloc summary::after{
-  content:"+";margin-left:auto;flex:0 0 auto;color:var(--gris);font-size:16px;
-  line-height:1;padding-top:2px;
-}
-details.bloc[open] summary::after{content:"–"}
-.corps{padding:0 2px 24px}
-.corps h4{margin:22px 0 9px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gris);font-weight:600}
-.corps h4:first-child{margin-top:0}
-.corps ul{list-style:none;margin:0;padding:0}
-.corps ul li{display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--voile);
-  font-size:14.5px}
-.corps ul li span{margin-left:auto;color:var(--gris);font-size:12px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
-.corps ol{margin:0;padding:0;list-style:none;counter-reset:e}
-.corps ol li{counter-increment:e;position:relative;padding:0 0 16px 30px;font-size:15px;
-  line-height:1.6}
-.corps ol li::before{
-  content:counter(e,decimal-leading-zero);position:absolute;left:0;top:3px;
-  font-size:10px;letter-spacing:.1em;color:var(--chloro);
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-}
-.note{margin:8px 0 0;padding:13px 14px;background:var(--voile);font-size:13.5px;line-height:1.55}
-.note b{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--terre);
-  display:block;margin-bottom:5px;font-weight:600}
-.nutri{margin:12px 0 0;font-size:11px;letter-spacing:.06em;color:var(--gris);line-height:1.6;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.champ:focus{outline:2px solid var(--teinte-douce)}
+.champ::placeholder{color:var(--texte-3)}
+textarea.champ{min-height:120px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+.lien-discret{background:none;border:0;padding:6px 0;margin-top:8px;color:var(--texte-3);font-size:14px}
 
-/* --- bloc répartition -------------------------------------------- */
-.mont svg{width:100%;max-width:250px;display:block;margin:4px auto 0;color:var(--encre)}
-.mont .plateau{fill:none;stroke:currentColor;stroke-opacity:.3;stroke-width:1}
-.mont .sep{stroke:var(--papier);stroke-width:1.2;fill:none}
-.typ{margin:8px 0 0;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gris);text-align:center}
-ul.leg{list-style:none;margin:16px 0 0;padding:0}
-ul.leg li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;
-  border-bottom:1px solid var(--voile);font-size:10.5px;letter-spacing:.06em;
-  text-transform:uppercase;line-height:1.35}
-ul.leg li:last-child{border-bottom:0}
-ul.leg .sw{width:9px;height:9px;flex:0 0 auto;margin-top:2px}
-ul.leg .pc{margin-left:auto;padding-left:10px;color:var(--gris);letter-spacing:.02em;white-space:nowrap;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.lecture{margin:16px 0 0;font-size:14px;line-height:1.6;color:var(--gris)}
-.lecture b{color:var(--encre);font-weight:600}
+/* anneau de progression */
+.progres{display:flex;align-items:center;gap:16px}
+.anneau{width:62px;height:62px;flex:0 0 auto}
+.anneau circle{fill:none;stroke-width:7;stroke-linecap:round}
+.anneau .piste{stroke:var(--remplissage)}
+.anneau .val{stroke:var(--teinte);transition:stroke-dashoffset .5s ease;transform:rotate(-90deg);transform-origin:50% 50%}
+.progres .grand{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.progres .petit{font-size:15px;color:var(--texte-2);margin-top:2px}
+.vide{padding:6px 4px 2px;color:var(--texte-2);font-size:15px;line-height:1.5}
 
-/* --- débrief ----------------------------------------------------- */
-.plat{padding:22px 0;border-bottom:1px solid var(--filet)}
-.verdicts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.vd{
-  flex:1 1 auto;background:none;border:1px solid var(--filet);color:var(--gris);
-  padding:9px 4px;cursor:pointer;font-family:inherit;font-weight:600;font-size:9.5px;
-  line-height:1;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+/* --- courses ---------------------------------------------------- */
+.barre-courses{height:8px;border-radius:99px;background:var(--remplissage);overflow:hidden;margin-top:14px}
+.barre-courses i{display:block;height:100%;width:0;border-radius:99px;background:var(--teinte);transition:width .35s ease}
+.article{cursor:pointer;user-select:none;-webkit-user-select:none}
+.article input{position:absolute;opacity:0;pointer-events:none}
+.article .rond{
+  width:24px;height:24px;flex:0 0 auto;border-radius:50%;border:1.8px solid var(--texte-3);
+  display:grid;place-items:center;transition:all .18s ease;
 }
-.vd.on{color:var(--papier);border-color:transparent}
-.vd.v-encore.on{background:#46603F}
-.vd.v-bien.on  {background:#6E7B6A}
-.vd.v-bof.on   {background:#9C5A34}
-.vd.v-jamais.on{background:#7A3B22}
-.vd.v-non.on   {background:#8C8578}
-@media (prefers-color-scheme:dark){.vd.on{color:#101110}}
-.pourquoi{
-  width:100%;margin-top:10px;border:0;border-bottom:1px solid var(--filet);
-  border-radius:0;background:none;color:var(--encre);padding:8px 2px;
-  font-family:inherit;font-size:14px;
-}
-.pourquoi:focus{outline:0;border-bottom-color:var(--chloro)}
-.pourquoi::placeholder{color:var(--gris);opacity:.7}
+.article .rond svg{width:13px;height:13px;opacity:0;transition:opacity .18s ease}
+.article .rond svg path{stroke:var(--sur-teinte)}
+.article input:checked + .rond{background:var(--teinte);border-color:var(--teinte)}
+.article input:checked + .rond svg{opacity:1}
+.article .nom{transition:color .2s ease}
+.article input:checked ~ .nom{color:var(--texte-3);text-decoration:line-through;text-decoration-thickness:1px}
+.article input:checked ~ .val{opacity:.5}
 
-.semaine-arc summary .ttl{font-size:14px}
-.arc{list-style:none;margin:0;padding:0}
-.arc li{display:flex;align-items:baseline;gap:12px;padding:9px 0;
-  border-bottom:1px solid var(--voile);font-size:14px;line-height:1.4}
-.arc li:last-child{border-bottom:0}
-.arc .v{margin-left:auto;flex:0 0 auto;font-size:9.5px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;padding:3px 7px;color:var(--papier);white-space:nowrap}
-@media (prefers-color-scheme:dark){.arc .v{color:#101110}}
-.arc .note{display:block;margin:4px 0 0;padding:0;background:none;font-size:13px;
-  color:var(--gris);font-style:italic}
-.vide{padding:22px 2px;font-size:14px;color:var(--gris);line-height:1.6}
-.compteurs{display:flex;gap:3px;margin-left:auto;flex:0 0 auto}
-.compteurs i{font-style:normal;font-size:9.5px;font-weight:600;letter-spacing:.06em;
-  padding:3px 6px;color:var(--papier);min-width:22px;text-align:center}
-@media (prefers-color-scheme:dark){.compteurs i{color:#101110}}
+/* --- recettes ----------------------------------------------------- */
+details.recette{padding:0;overflow:hidden}
+details.recette summary{list-style:none;padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer}
+details.recette summary::-webkit-details-marker{display:none}
+details.recette summary .titres{flex:1;min-width:0}
+details.recette summary .titres b{display:block;font-size:17px;font-weight:600;line-height:1.3;letter-spacing:-.015em}
+details.recette summary .titres span{font-size:13px;color:var(--texte-2)}
+.chevron{width:9px;height:9px;flex:0 0 auto;border-right:2px solid var(--texte-3);border-bottom:2px solid var(--texte-3);transform:rotate(45deg);transition:transform .2s ease;margin-right:4px}
+details[open] > summary .chevron{transform:rotate(-135deg)}
+.corps{padding:0 18px 20px}
+.corps h4{margin:22px 0 10px;font-size:13px;font-weight:600;color:var(--texte-2);text-transform:uppercase;letter-spacing:.02em}
+.corps h4:first-child{margin-top:4px}
+.compo{list-style:none;margin:0;padding:0;border-radius:12px;background:var(--remplissage)}
+.compo li{display:flex;gap:12px;padding:10px 14px;font-size:16px;position:relative}
+.compo li + li::before{content:"";position:absolute;top:0;left:14px;right:0;border-top:.5px solid var(--sep)}
+.compo li span{margin-left:auto;color:var(--texte-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.etapes{list-style:none;margin:0;padding:0;counter-reset:e}
+.etapes li{counter-increment:e;position:relative;padding:0 0 16px 40px;font-size:17px;line-height:1.55}
+.etapes li::before{
+  content:counter(e);position:absolute;left:0;top:1px;width:27px;height:27px;border-radius:50%;
+  background:var(--teinte-douce);color:var(--teinte);font-size:14px;font-weight:700;
+  display:grid;place-items:center;
+}
+.astuce{margin-top:8px;padding:14px 16px;border-radius:14px;background:var(--terre-douce);font-size:15px;line-height:1.5}
+.astuce b{display:block;color:var(--terre);font-size:13px;margin-bottom:3px}
+.nutri{margin:10px 2px 0;font-size:13px;color:var(--texte-3);line-height:1.5}
+.bas-recette{margin-top:20px}
 
-/* --- titres de section ---------------------------------------- */
-.section{
-  margin:34px 0 0;padding-bottom:8px;border-bottom:1px solid var(--encre);
-  font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;
-}
-.intro{margin:14px 0 0;font-size:14px;color:var(--gris);line-height:1.6}
-.bloc-txt{padding:22px 0;border-bottom:1px solid var(--filet)}
-.bloc-txt p{margin:0 0 12px;font-size:14.5px;line-height:1.6}
-.bloc-txt p:last-child{margin-bottom:0}
+/* répartition */
+.repart svg{width:100%;max-width:240px;display:block;margin:6px auto 0;color:var(--texte)}
+.repart .plateau{fill:none;stroke:currentColor;stroke-opacity:.18;stroke-width:1}
+.repart .sep{stroke:var(--fond);stroke-width:1.5}
+.leg{list-style:none;margin:14px 0 0;padding:0}
+.leg li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:15px;border-bottom:.5px solid var(--sep)}
+.leg li:last-child{border-bottom:0}
+.leg .pastille{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.leg .v{margin-left:auto;color:var(--texte-2);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lecture{margin:14px 0 0;font-size:15px;line-height:1.5;color:var(--texte-2)}
+.lecture b{color:var(--texte)}
 
-/* --- assiette -------------------------------------------------- */
-.plaque{width:100%;max-width:290px;display:block;margin:22px auto 6px;color:var(--encre)}
-.legende{margin:0 auto 4px;max-width:290px}
-ul.tab{list-style:none;margin:0;padding:0}
-ul.tab li{display:flex;gap:14px;align-items:baseline;padding:11px 0;
-  border-bottom:1px solid var(--voile);font-size:14.5px}
-ul.tab li:last-child{border-bottom:0}
-ul.tab li span{margin-left:auto;color:var(--gris);text-align:right;font-size:12px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em}
-.herbier{display:block;width:64px;margin:34px auto 0;stroke:var(--chloro);fill:none;
-  stroke-width:.9;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+/* guide */
+.plaque{width:100%;max-width:260px;display:block;margin:4px auto}
 
-/* --- réglages --------------------------------------------------- */
-textarea{
-  width:100%;min-height:130px;border:1px solid var(--filet);border-radius:0;
-  padding:13px;background:var(--voile);color:var(--encre);resize:vertical;
-  font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
-}
-textarea:focus{outline:0;border-color:var(--encre)}
-.act{
-  background:var(--encre);color:var(--papier);border:1px solid var(--encre);
-  padding:13px 20px;cursor:pointer;margin-top:12px;
-  font-family:inherit;font-weight:600;font-size:10.5px;line-height:1;letter-spacing:.18em;text-transform:uppercase;
-}
-.act.vide,.act.vide-b{background:none;color:var(--encre)}
-.act.vide-b{margin-left:8px}
-.act.att{background:none;color:var(--terre);border-color:var(--terre)}
-.msg{margin-top:12px;font-size:12.5px;line-height:1.5;padding:11px 13px;display:none;
-  border-left:2px solid var(--chloro);background:var(--voile)}
-.msg.ok{display:block}
-.msg.ko{display:block;border-left-color:var(--terre)}
-.etapes{margin:0;padding:0;list-style:none;counter-reset:s}
-.etapes li{counter-increment:s;position:relative;padding:0 0 12px 30px;font-size:14.5px;
-  line-height:1.55}
-.etapes li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;
-  font-size:10px;color:var(--chloro);letter-spacing:.1em;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* --- bilan ------------------------------------------------------ */
+.etat-plat{font-size:13px;color:var(--texte-2)}
+.compteurs{display:flex;gap:4px;margin-left:auto;flex:0 0 auto}
+.compteurs i{font-style:normal;font-size:12px;font-weight:700;min-width:24px;padding:3px 7px;border-radius:99px;color:#fff;text-align:center}
+.semaine-arc .note-arc{display:block;font-size:13px;color:var(--texte-2);font-style:italic;margin-top:2px}
 
-.pied{margin:30px 0 0;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--gris);text-align:center;line-height:2.2}
+/* --- messages --------------------------------------------------- */
+.msg{display:none;margin-top:12px;padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.45}
+.msg.ok{display:block;background:var(--teinte-douce);color:var(--teinte)}
+.msg.ko{display:block;background:var(--terre-douce);color:var(--terre)}
+.msg textarea{width:100%;margin-top:8px}
 
-/* --- navigation ------------------------------------------------- */
-nav{
-  position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--papier);
-  border-top:1px solid var(--encre);display:flex;
-  padding:0 8px calc(env(safe-area-inset-bottom));
+/* --- barre d'onglets flottante ----------------------------------- */
+nav.onglets{
+  position:fixed;z-index:50;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 10px);
+  max-width:520px;margin:0 auto;display:flex;padding:6px;gap:2px;border-radius:30px;
+  background:var(--verre);border:.5px solid var(--liseré);box-shadow:var(--ombre-flottante);
+  -webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);
 }
-nav button{
-  flex:1;background:none;border:0;padding:17px 2px 15px;cursor:pointer;color:var(--gris);
-  font-family:inherit;font-weight:600;font-size:9.5px;line-height:1;letter-spacing:.06em;text-transform:uppercase;
-  border-top:2px solid transparent;margin-top:-1px;
+nav.onglets button{
+  flex:1;min-width:0;border:0;background:transparent;border-radius:24px;padding:7px 2px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--texte-2);
+  font-size:10.5px;font-weight:600;letter-spacing:0;transition:background .2s ease,color .2s ease;
 }
-nav button.on{color:var(--encre);border-top-color:var(--chloro)}
-/* six onglets ne tiennent pas sur les écrans les plus étroits sans resserrer */
-@media (max-width:359px){
-  nav{padding-left:2px;padding-right:2px}
-  nav button{font-size:8.5px;letter-spacing:.01em;padding-left:0;padding-right:0}
-}
+nav.onglets button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.onglets button.on{color:var(--teinte);background:var(--teinte-douce)}
+@media (max-width:359px){nav.onglets button{font-size:9.5px} nav.onglets button svg{width:22px;height:22px}}
 
-.flash{
-  position:fixed;left:20px;right:20px;bottom:calc(84px + env(safe-area-inset-bottom));
-  background:var(--encre);color:var(--papier);z-index:50;padding:13px 15px;
-  font-family:inherit;font-weight:600;font-size:10px;line-height:1.4;letter-spacing:.16em;text-transform:uppercase;
-  opacity:0;pointer-events:none;transition:opacity .22s;text-align:center;
+.toast{
+  position:fixed;z-index:60;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);
+  transform:translate(-50%,16px);opacity:0;pointer-events:none;max-width:calc(100% - 32px);
+  padding:11px 18px;border-radius:999px;font-size:15px;font-weight:600;text-align:center;
+  background:var(--verre);border:.5px solid var(--liseré);box-shadow:var(--ombre-flottante);
+  -webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);
+  transition:opacity .25s ease, transform .3s cubic-bezier(.2,.9,.3,1.2);
 }
-.flash.on{opacity:1}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* --- accessibilité ----------------------------------------------- */
+@media (prefers-reduced-transparency:reduce){
+  :root{--verre:var(--materiau-fort);--materiau:var(--materiau-fort)}
+  .barre,nav.onglets,.toast{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .fond{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+::view-transition-group(*){animation-duration:.32s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="wordmark">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 22V7"/>
-      <path d="M12 13c0-3 2.4-5.2 5.6-5.6C17.4 10.6 15.2 13 12 13z"/>
-      <path d="M12 17.5c0-2.6-2-4.6-4.8-4.9C7.4 15.4 9.3 17.5 12 17.5z"/>
-      <path d="M12 8.5c0-2.6 1.5-4.4 3.6-5.2C15.4 5.8 14 7.8 12 8.5z"/>
-    </svg>
-    Popote
-  </div>
-  <div class="specline mono" id="spec"></div>
-</header>
+<div class="fond" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="barre" id="barre" aria-hidden="true"></div>
 
 <main>
-  <section class="panel on" id="p-menu">
-    <div id="fiches"></div>
-    <div class="bilan mono" id="bilan"></div>
+  <!-- ======================= SEMAINE ======================= -->
+  <section class="panel on" id="p-semaine" data-titre="Cette semaine">
+    <h1 class="titre">Cette semaine</h1>
+    <p class="sous-titre" id="spec"></p>
+    <div class="carte" id="progresSemaine"></div>
+    <h2 class="entete" id="hAFaire">Au menu <small id="nAFaire"></small></h2>
+    <div id="aFaire"></div>
+    <h2 class="entete" id="hFaits">Déjà cuisinés <small id="nFaits"></small></h2>
+    <div id="faits"></div>
+    <p class="pied" id="bilanSemaine"></p>
   </section>
 
-  <section class="panel" id="p-courses">
-    <div class="jauge">
-      <span class="n" id="cpt">00 / 00</span>
-      <span class="piste"><i id="prog"></i></span>
-      <button class="lien" id="raz">Décocher</button>
+  <!-- ======================= COURSES ======================= -->
+  <section class="panel" id="p-courses" data-titre="Courses">
+    <h1 class="titre">Courses</h1>
+    <p class="sous-titre">Dans l'ordre des rayons du magasin</p>
+    <div class="carte">
+      <div class="progres">
+        <div style="flex:1">
+          <div class="grand" id="cpt">0 sur 0</div>
+          <div class="petit">articles dans le panier</div>
+        </div>
+        <button class="bt" id="raz">Tout décocher</button>
+      </div>
+      <div class="barre-courses"><i id="prog"></i></div>
     </div>
     <div id="courses"></div>
-    <div class="pied">Ordre de circulation en magasin<br>
-      Huile · sel · épices · vinaigre supposés présents</div>
+    <p class="pied">Huile, sel, épices et vinaigre sont supposés déjà dans tes placards.</p>
   </section>
 
-  <section class="panel" id="p-recettes"><div id="recettes"></div></section>
-
-  <section class="panel" id="p-assiette">
-    <div class="section">01 — L'assiette de référence</div>
-    <p class="intro">Une règle visuelle, valable pour presque tous les dîners :
-      la moitié en légumes, un quart en protéines, un quart en féculents.</p>
-
-    <svg viewBox="0 0 200 200" class="plaque" role="img"
-         aria-label="Assiette : moitié légumes, quart protéines, quart féculents">
-      <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor"
-              stroke-opacity=".22" stroke-width="1"/>
-      <path d="M100,18 A82,82 0 0,0 100,182 Z" fill="#46603F" fill-opacity=".82"/>
-      <path d="M100,100 L100,18 A82,82 0 0,1 182,100 Z" fill="#9C5A34" fill-opacity=".82"/>
-      <path d="M100,100 L182,100 A82,82 0 0,1 100,182 Z" fill="#C9A24B" fill-opacity=".82"/>
-      <circle cx="100" cy="100" r="82" fill="none" stroke="var(--papier)" stroke-width="1"/>
-      <line x1="100" y1="18" x2="100" y2="182" stroke="var(--papier)" stroke-width="1"/>
-      <line x1="100" y1="100" x2="182" y2="100" stroke="var(--papier)" stroke-width="1"/>
-      <text x="56"  y="97"  fill="#F2F1EC" font-size="9" letter-spacing="1.6"
-            text-anchor="middle" font-weight="600">LÉGUMES</text>
-      <text x="56"  y="112" fill="#F2F1EC" font-size="10" text-anchor="middle"
-            opacity=".8" font-family="ui-monospace,Menlo,monospace">250–300 G</text>
-      <text x="138" y="60"  fill="#F2F1EC" font-size="8" letter-spacing="1.4"
-            text-anchor="middle" font-weight="600">PROTÉINES</text>
-      <text x="138" y="74"  fill="#F2F1EC" font-size="9.5" text-anchor="middle"
-            opacity=".8" font-family="ui-monospace,Menlo,monospace">130–150 G</text>
-      <text x="138" y="136" fill="#F2F1EC" font-size="8" letter-spacing="1.4"
-            text-anchor="middle" font-weight="600">FÉCULENTS</text>
-      <text x="138" y="150" fill="#F2F1EC" font-size="9.5" text-anchor="middle"
-            opacity=".8" font-family="ui-monospace,Menlo,monospace">70–80 G</text>
-    </svg>
-    <div class="legende pied" style="margin-top:0">Poids pesés crus · + 1 à 1,5 c. à s. d'huile</div>
-
-    <div class="section">02 — Équivalences protéiques</div>
-    <p class="intro">Ce qui remplace un quart d'assiette, pour une portion.</p>
-    <ul class="tab">
-      <li>Viande ou poisson<span>130–150 G CRUS</span></li>
-      <li>Œufs<span>2 À 3</span></li>
-      <li>Légumineuses<span>60–70 G CRUES</span></li>
-      <li>Tofu ou tempeh<span>150 G</span></li>
-      <li>Fromage en plat principal<span>60–80 G</span></li>
-    </ul>
-    <p class="intro">Côté féculents, 70 à 80 g crus donnent une fois cuits environ 200 g de pâtes
-      ou de riz, ou 250 g de pommes de terre. C'est systématiquement moins que ce qu'on verse
-      spontanément dans la casserole.</p>
-
-    <div class="section">03 — Repères sans balance</div>
-    <ul class="tab">
-      <li>La paume de la main<span>1 PORTION DE VIANDE</span></li>
-      <li>Le poing fermé<span>1 PORTION DE FÉCULENTS CUITS</span></li>
-      <li>Les deux mains en coupe<span>1 PORTION DE LÉGUMES</span></li>
-    </ul>
-
-    <div class="section">04 — Les dix gestes</div>
-    <p class="intro">Des principes, pas des astuces : chacun est expliqué par sa raison physique,
-      ce qui permet de le transposer à d'autres plats.</p>
-    <div id="gestes"></div>
-
-    <svg viewBox="0 0 60 120" class="herbier" aria-hidden="true">
-      <path d="M30 118V16"/>
-      <path d="M30 96c0-11 8-18 20-19-1 11-9 19-20 19z"/>
-      <path d="M30 80c0-11-8-18-20-19 1 11 9 19 20 19z"/>
-      <path d="M30 62c0-11 7.5-18 19-19-1 11-8.5 19-19 19z"/>
-      <path d="M30 46c0-11-7.5-18-19-19 1 11 8.5 19 19 19z"/>
-      <path d="M30 30c0-9 5-15 12-17.5C41 21 37 27.5 30 30z"/>
-      <path d="M30 20c0-7-4-12-9.5-14C21 13 24.5 18 30 20z"/>
-    </svg>
-  </section>
-
-  <section class="panel" id="p-debrief">
-    <div class="section">01 — La semaine écoulée</div>
-    <p class="intro">Un verdict par plat, et surtout une raison en quelques mots. C'est la raison
-      qui permet de corriger : un plat fade se répare, un ingrédient détesté condamne toute une
-      famille de recettes, une recette trop longue est une erreur d'estimation. Trente secondes,
-      pas davantage.</p>
-    <div id="debrief"></div>
-    <div id="envoi"></div>
-
-    <div class="section">02 — Historique</div>
-    <p class="intro">Les semaines archivées, la plus récente en tête. Une semaine est archivée
-      automatiquement quand tu en charges une nouvelle.</p>
-    <div id="histo"></div>
-
-    <div class="section">03 — Palmarès</div>
-    <p class="intro">Le cumul de tous tes verdicts, plat par plat. C'est ce tableau qui dit ce
-      qu'il faut refaire et ce qu'il faut oublier.</p>
-    <div id="palmares"></div>
-  </section>
-
-  <section class="panel" id="p-reglages">
-    <div class="section">01 — Charger la semaine</div>
-    <p class="intro">Trois voies, de la plus rapide à la plus manuelle. Dans tous les cas, les
-      cases cochées et les substitutions sont remises à zéro.</p>
-    <p class="intro"><b>Le lien.</b> Le dimanche, tu reçois un lien : tu l'ouvres, Popote se lance
-      avec la semaine déjà chargée. Rien à copier.</p>
-    <p class="intro"><b>Le presse-papiers.</b> Si tu as copié le bloc, ce bouton le récupère et
-      le charge d'un geste.</p>
-    <div><button class="act vide" id="coller">Coller le presse-papiers</button></div>
-    <p class="intro" style="margin-top:22px"><b>À la main.</b> En dernier recours, colle le bloc
-      dans le champ ci-dessous.</p>
-    <textarea id="json" placeholder='{ "semaine": "…", "jours": [ … ] }'></textarea>
-    <div><button class="act" id="charger">Charger</button></div>
-    <div class="msg" id="msg"></div>
-
-    <div class="section">02 — Envoyer les photos</div>
-    <p class="intro">Popote ne sait pas envoyer d'image : c'est un document, pas un service.
-      Le bouton ouvre Claude, où tu joins tes quatre photos — frigo, placards, congélateur,
-      corbeille.</p>
-    <div><button class="act vide" id="claude">Ouvrir Claude</button></div>
-
-    <div class="section">03 — Sauvegarde</div>
-    <p class="intro">Exporte la semaine en cours. À faire avant de vider le cache du navigateur,
-      qui effacerait tout.</p>
-    <div>
-      <button class="act vide" id="export">Exporter</button>
-      <button class="act att" id="effacer">Tout effacer</button>
+  <!-- ======================= RECETTES ====================== -->
+  <section class="panel" id="p-recettes" data-titre="Recettes">
+    <h1 class="titre">Recettes</h1>
+    <p class="sous-titre">Les cinq plats retenus cette semaine</p>
+    <div class="segment" id="segRecettes" role="tablist">
+      <button class="on" data-vue="recettes">Recettes</button>
+      <button data-vue="guide">Guide</button>
     </div>
+    <div id="vueRecettes" style="margin-top:16px"><div id="recettes"></div></div>
+    <div id="vueGuide" style="margin-top:16px;display:none">
+      <div class="carte">
+        <h3 style="margin:0 0 4px;font-size:20px;letter-spacing:-.02em">L'assiette de référence</h3>
+        <p class="usage" style="margin-top:0">La moitié en légumes, un quart en protéines, un quart en féculents. Une règle qui marche pour presque tous les dîners.</p>
+        <svg viewBox="0 0 200 200" class="plaque" role="img" aria-label="Moitié légumes, quart protéines, quart féculents">
+          <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-opacity=".15"/>
+          <path d="M100,18 A82,82 0 0,0 100,182 Z" fill="#46603F"/>
+          <path d="M100,100 L100,18 A82,82 0 0,1 182,100 Z" fill="#9C5A34"/>
+          <path d="M100,100 L182,100 A82,82 0 0,1 100,182 Z" fill="#C9A24B"/>
+          <line x1="100" y1="18" x2="100" y2="182" stroke="var(--fond)" stroke-width="2.5"/>
+          <line x1="100" y1="100" x2="182" y2="100" stroke="var(--fond)" stroke-width="2.5"/>
+          <text x="56" y="96" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Légumes</text>
+          <text x="56" y="112" fill="#fff" font-size="11" text-anchor="middle" opacity=".85">250–300 g</text>
+          <text x="139" y="62" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">Protéines</text>
+          <text x="139" y="76" fill="#fff" font-size="10" text-anchor="middle" opacity=".85">130–150 g</text>
+          <text x="139" y="138" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">Féculents</text>
+          <text x="139" y="152" fill="#fff" font-size="10" text-anchor="middle" opacity=".85">70–80 g</text>
+        </svg>
+        <p class="nutri" style="text-align:center">Poids pesés crus · plus 1 à 1,5 c. à s. d'huile</p>
+      </div>
 
-    <div class="section">04 — Installation</div>
-    <ol class="etapes" style="margin-top:16px">
-      <li>Ouvrir cette page dans <b>Safari</b> — sur iPhone, seul Safari sait installer.</li>
-      <li>Appuyer sur <b>Partager</b>, le carré à la flèche montante.</li>
-      <li>Faire défiler, choisir <b>Sur l'écran d'accueil</b>.</li>
-      <li>L'app s'ouvre alors en plein écran et fonctionne hors ligne.</li>
-    </ol>
+      <p class="legende-liste">Ce qui vaut un quart d'assiette de protéines</p>
+      <div class="groupe">
+        <div class="ligne">Viande ou poisson<span class="val">130–150 g crus</span></div>
+        <div class="ligne">Œufs<span class="val">2 à 3</span></div>
+        <div class="ligne">Légumineuses<span class="val">60–70 g crues</span></div>
+        <div class="ligne">Tofu ou tempeh<span class="val">150 g</span></div>
+        <div class="ligne">Fromage en plat principal<span class="val">60–80 g</span></div>
+      </div>
+      <p class="pied">70 à 80 g de pâtes ou de riz crus donnent environ 200 g cuits. C'est presque toujours moins que ce qu'on verse spontanément.</p>
 
-    <div class="pied" id="ver"></div>
+      <p class="legende-liste">Sans balance</p>
+      <div class="groupe">
+        <div class="ligne">La paume de la main<span class="val">1 portion de viande</span></div>
+        <div class="ligne">Le poing fermé<span class="val">1 portion de féculents cuits</span></div>
+        <div class="ligne">Les deux mains en coupe<span class="val">1 portion de légumes</span></div>
+      </div>
+
+      <h2 class="entete">Les dix gestes</h2>
+      <div id="gestes"></div>
+    </div>
+  </section>
+
+  <!-- ======================== BILAN ======================== -->
+  <section class="panel" id="p-bilan" data-titre="Bilan">
+    <h1 class="titre">Bilan</h1>
+    <p class="sous-titre">Ce que tu as cuisiné, ce que tu en as pensé</p>
+    <div class="carte" id="envoi"></div>
+    <h2 class="entete">Cette semaine</h2>
+    <div class="groupe" id="recap"></div>
+    <h2 class="entete">Palmarès</h2>
+    <div id="palmares"></div>
+    <h2 class="entete">Semaines passées</h2>
+    <div id="histo"></div>
+  </section>
+
+  <!-- ====================== RÉGLAGES ======================= -->
+  <section class="panel" id="p-reglages" data-titre="Réglages">
+    <h1 class="titre">Réglages</h1>
+    <p class="sous-titre" id="ver"></p>
+
+    <p class="legende-liste">Nouvelle semaine</p>
+    <div class="groupe">
+      <button class="ligne bouton" id="coller">Coller depuis le presse-papiers</button>
+      <button class="ligne bouton" id="manuel">Saisir à la main</button>
+    </div>
+    <div id="zoneManuelle" style="display:none">
+      <textarea class="champ" id="json" placeholder='{ "semaine": "…", "jours": [ … ] }'></textarea>
+      <div class="rangee"><button class="bt plein" id="charger">Charger</button></div>
+    </div>
+    <div class="msg" id="msg"></div>
+    <p class="pied">Le dimanche, tu reçois un lien. Sur iPhone, ne l'ouvre pas : appuie longuement dessus, « Copier », reviens ici et touche « Coller ». Un lien s'ouvre toujours dans Safari, qui ne partage pas ses données avec l'app installée. L'ancienne semaine rejoint l'historique.</p>
+
+    <p class="legende-liste">Synchronisation</p>
+    <div id="sync"></div>
+
+    <p class="legende-liste">Données</p>
+    <div class="groupe">
+      <button class="ligne bouton" id="export">Exporter une sauvegarde</button>
+      <button class="ligne bouton danger" id="effacer">Tout effacer</button>
+    </div>
+    <p class="pied">Tout vit dans ce téléphone. Vider les données de Safari effacerait Popote : exporte avant.</p>
+
+    <p class="legende-liste">Installer sur l'iPhone</p>
+    <div class="groupe">
+      <div class="ligne">1. Ouvrir la page dans <b>&nbsp;Safari</b></div>
+      <div class="ligne">2. Bouton <b>&nbsp;Partager</b></div>
+      <div class="ligne">3. <b>Sur l'écran d'accueil</b></div>
+    </div>
   </section>
 </main>
 
-<div class="flash" id="flash"></div>
-
-<nav>
-  <button class="on" data-p="menu">Menu</button>
-  <button data-p="courses">Courses</button>
-  <button data-p="recettes">Recettes</button>
-  <button data-p="assiette">Assiette</button>
-  <button data-p="debrief">Débrief</button>
-  <button data-p="reglages">Réglages</button>
+<nav class="onglets" aria-label="Sections">
+  <button class="on" data-p="semaine" aria-current="page">
+    <svg viewBox="0 0 24 24"><path d="M6 3v5a2 2 0 0 0 4 0V3M8 3v4M8 10v11M17 21V3c-1.9 1.1-3 3.3-3 6.5V13h3"/></svg>Semaine</button>
+  <button data-p="courses">
+    <svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.3"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>Courses</button>
+  <button data-p="recettes">
+    <svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2zM5 20a2 2 0 0 0 2 2h12v-4"/><path d="M9 7h6M9 10.5h4"/></svg>Recettes</button>
+  <button data-p="bilan">
+    <svg viewBox="0 0 24 24"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5 2.7 1-5.6-4.1-3.9 5.6-.8z"/></svg>Bilan</button>
+  <button data-p="reglages">
+    <svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>Réglages</button>
 </nav>
 
+<div class="toast" id="flash" role="status" aria-live="polite"></div>
 <script>
 "use strict";
-const VERSION = "3.0";
-const RAYONS = {LEG:"Fruits & légumes",BOU:"Boucherie",POI:"Poissonnerie",
-                CRE:"Crèmerie",EPI:"Épicerie salée",SUR:"Surgelés",PAI:"Pain"};
-const ORDRE = ["LEG","BOU","POI","CRE","EPI","SUR","PAI"];
-
-/* --- stockage ------------------------------------------------- */
-const Store = {
-  get(k,d){ try{ const v=localStorage.getItem("popote."+k); return v===null?d:JSON.parse(v); }
-            catch(e){ return d; } },
-  set(k,v){ try{ localStorage.setItem("popote."+k,JSON.stringify(v)); return true; }
-            catch(e){ return false; } },
-  del(k){ try{ localStorage.removeItem("popote."+k); }catch(e){} }
-};
-
-/* --- semaine par défaut ---------------------------------------
-   f  = formule : composition massique réelle, top 3, façon étiquette
-   sd = descripteur technique
-   --------------------------------------------------------------- */
 const DEFAUT = {
- semaine:"Semaine 35 · 24–28 août",
+ semaine:"Semaine d'exemple",
  jours:[
  {j:"Lundi", opts:[
   {n:"Gnocchis poêlés, courgettes et pesto minute",t:"25 min",p:9,k:750,pr:23,
@@ -782,197 +742,6 @@ const DEFAUT = {
    tip:"Le noyau dans le guacamole ne l'empêche pas de noircir. Le citron et un film au contact, si."}]}
 ]};
 
-/* --- état ------------------------------------------------------ */
-let DATA = Store.get("semaine", null) || DEFAUT;
-let sel  = Store.get("sel", null);
-let coche = Store.get("coche", null) || {};
-let notes = Store.get("notes", null) || {};
-let hist  = Store.get("hist",  null) || [];
-if(!Array.isArray(sel) || sel.length !== DATA.jours.length) sel = DATA.jours.map(()=>0);
-function save(){ Store.set("sel", sel); Store.set("coche", coche); }
-
-const $ = id => document.getElementById(id);
-const n2 = n => String(n).padStart(2,"0");
-
-/* --- menu ------------------------------------------------------ */
-function renderMenu(){
-  $("fiches").innerHTML = DATA.jours.map((d,i)=>{
-    const o = d.opts[sel[i]];
-    return '<article class="fiche">'
-      + '<div class="ref"><b>Jour ' + n2(i+1) + '</b> ' + d.j
-      +   '<span class="t mono">' + (o.t||'') + '</span></div>'
-      + '<p class="formule">' + (o.f || o.n.toUpperCase()) + '</p>'
-      + '<p class="nom">' + o.n + '</p>'
-      + (o.sd ? '<p class="desc">' + o.sd + '</p>' : '')
-      + (o.w  ? '<p class="usage">' + o.w + '</p>' : '')
-      + '<div class="data">'
-      +   '<span><b>' + (o.k||'—') + '</b>kcal</span>'
-      +   '<span><b>' + (o.pr||'—') + '</b>g prot.</span>'
-      +   '<span><b>' + (o.p ? o.p+',00' : '—') + '</b>€</span>'
-      + '</div>'
-      + (d.opts.length>1
-          ? '<button class="sub" data-i="'+i+'">Substituer'
-            + '<i class="mono">' + n2(sel[i]+1) + ' / ' + n2(d.opts.length) + '</i></button>'
-          : '')
-      + '</article>';
-  }).join('');
-
-  $("fiches").querySelectorAll('.sub').forEach(b=>b.addEventListener('click',()=>{
-    const i = +b.dataset.i;
-    sel[i] = (sel[i]+1) % DATA.jours[i].opts.length;
-    save(); renderAll(); flash('Formule substituée · liste recalculée');
-  }));
-
-  const prix = DATA.jours.reduce((s,d,i)=>s+(d.opts[sel[i]].p||0),0);
-  $("spec").textContent = (DATA.semaine||'') + ' — 2 pers. — ' + prix + ' €';
-
-  const veg = DATA.jours.filter((d,i)=>(d.opts[sel[i]].tags||[]).some(t=>t[0]==='Végétarien')).length;
-  const leg = new Set();
-  DATA.jours.forEach((d,i)=>d.opts[sel[i]].ing.forEach(g=>{ if(g[0]==='LEG') leg.add(g[1]); }));
-  const ks = DATA.jours.map((d,i)=>d.opts[sel[i]].k).filter(Boolean);
-  const moy = ks.length ? Math.round(ks.reduce((a,b)=>a+b,0)/ks.length/10)*10 : 0;
-  $("bilan").innerHTML =
-      'Composition — <b>' + veg + '</b> dîners végétariens · <b>' + leg.size + '</b> produits frais<br>'
-    + 'Densité — <b>' + moy + ' kcal</b> par portion en moyenne, ±15 %<br>'
-    + 'Contraintes — sans four · 40 min maximum';
-}
-
-/* --- courses --------------------------------------------------- */
-function renderCourses(){
-  const agg = {};
-  DATA.jours.forEach((d,i)=>d.opts[sel[i]].ing.forEach(g=>{
-    const [r,n,q,u,uniq] = g;
-    if(r === 'P') return;
-    const k = r+'|'+n+'|'+u;
-    if(!agg[k]) agg[k] = {r,n,q:0,u,uniq};
-    agg[k].q = uniq ? Math.max(agg[k].q,q) : agg[k].q + q;
-  }));
-  const parR = {};
-  Object.values(agg).forEach(it=>{ (parR[it.r] = parR[it.r]||[]).push(it); });
-
-  let h = '';
-  ORDRE.forEach(r=>{
-    if(!parR[r]) return;
-    h += '<div class="rayon">' + (RAYONS[r]||r)
-       + '<i>' + n2(parR[r].length) + '</i></div><ul class="liste">';
-    parR[r].sort((a,b)=>a.n.localeCompare(b.n,'fr')).forEach(it=>{
-      const k = it.r+'-'+it.n;
-      h += '<li><label><input type="checkbox" data-k="'+k+'"'+(coche[k]?' checked':'')+'>'
-         + '<span class="txt">'+it.n+'</span>'
-         + '<span class="q">'+(it.q ? it.q+(it.u?' '+it.u:'') : '—')+'</span></label></li>';
-    });
-    h += '</ul>';
-  });
-  $("courses").innerHTML = h;
-  document.querySelectorAll('#courses input').forEach(b=>
-    b.addEventListener('change',()=>{ coche[b.dataset.k]=b.checked; save(); compte(); }));
-  compte();
-}
-function compte(){
-  const b = [...document.querySelectorAll('#courses input')];
-  const f = b.filter(x=>x.checked).length;
-  $("cpt").textContent = n2(f) + ' / ' + n2(b.length);
-  $("prog").style.width = (b.length ? f/b.length*100 : 0) + '%';
-}
-
-/* --- répartition dans l'assiette -------------------------------
-   Deux lectures d'un même plat, qui ne disent pas la même chose :
-   ce qui remplit l'assiette (la masse) et d'où vient l'énergie
-   (les calories). L'écart entre les deux est l'information utile.
-
-   Les poids sont des poids CUITS estimés : un riz pèse 2,6 fois son
-   poids sec, une viande en perd 28 %. Comparer des poids crus à la
-   règle du demi-quart-quart n'aurait aucun sens.
-   ---------------------------------------------------------------- */
-const ROLES = {
-  "LÉGUMES":"#46603F", "PROTÉINES":"#9C5A34", "FÉCULENTS":"#C9A24B",
-  "MATIÈRES GRASSES":"#8C8578", "ASSAISONNEMENT":"#B5AFA2"
-};
-
-function secteur(cx,cy,r,a0,a1){
-  const px = a => [cx + r*Math.cos(a), cy + r*Math.sin(a)];
-  const [x0,y0] = px(a0), [x1,y1] = px(a1);
-  const grand = (a1-a0) > Math.PI ? 1 : 0;
-  return `M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} `
-       + `A${r},${r} 0 ${grand},1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`;
-}
-
-function repartition(rp){
-  const tg = rp.reduce((s,x)=>s+x[1],0) || 1;
-  const tk = rp.reduce((s,x)=>s+x[2],0) || 1;
-  const cx = 110, cy = 66;
-  const teinte = n => ROLES[n] || "#8C8578";
-
-  let s = '<svg viewBox="0 0 220 172" role="img" '
-        + 'aria-label="Répartition en masse et en calories">';
-
-  // l'assiette : la place que chaque famille occupe réellement
-  s += `<circle class="plateau" cx="${cx}" cy="${cy}" r="60"/>`;
-  let a = -Math.PI/2;
-  rp.forEach(x=>{
-    const a2 = a + x[1]/tg*2*Math.PI;
-    s += `<path d="${secteur(cx,cy,52,a,a2)}" fill="${teinte(x[0])}" fill-opacity=".85"/>`;
-    s += `<path class="sep" d="M${cx},${cy} `
-      +  `L${(cx+52*Math.cos(a)).toFixed(1)},${(cy+52*Math.sin(a)).toFixed(1)}"/>`;
-    a = a2;
-  });
-  s += `<circle class="plateau" cx="${cx}" cy="${cy}" r="52"/>`;
-
-  // la barre : la même assiette, mais en calories
-  s += '<text x="26" y="137" font-size="7.5" letter-spacing="1.5" fill="currentColor" '
-    +  'fill-opacity=".45">ÉNERGIE</text>';
-  let x0 = 26;
-  rp.forEach(v=>{
-    const w = v[2]/tk*168;
-    s += `<rect x="${x0.toFixed(1)}" y="142" width="${w.toFixed(1)}" height="9" `
-      +  `fill="${teinte(v[0])}" fill-opacity=".85"/>`;
-    x0 += w;
-  });
-  s += '<text x="26" y="166" font-size="8.5" fill="currentColor" fill-opacity=".45" '
-    +  'font-family="ui-monospace,Menlo,monospace">'
-    +  `${Math.round(tg)} G · ${Math.round(tk)} KCAL PAR PORTION</text>`;
-  s += '</svg>';
-
-  s += '<ul class="leg">' + rp.map(x=>
-        `<li><span class="sw" style="background:${teinte(x[0])}"></span>`
-      + `${x[0]}<span class="pc">${x[1]} g · ${x[2]} kcal · ${Math.round(x[2]/tk*100)} %</span></li>`
-      ).join('') + '</ul>';
-
-  // la lecture : ce que ces chiffres disent, comparés à l'assiette de référence
-  const pm = n => { const e = rp.find(x=>x[0]===n); return e ? e[1]/tg*100 : 0; };
-  const pk = n => { const e = rp.find(x=>x[0]===n); return e ? e[2]/tk*100 : 0; };
-  const lg = Math.round(pm("LÉGUMES")), gr = Math.round(pk("MATIÈRES GRASSES"));
-  let l;
-  if(lg >= 45)      l = `<b>${lg} % de légumes</b> dans l'assiette : conforme à la moitié visée.`;
-  else if(lg >= 30) l = `<b>${lg} % de légumes</b> contre 50 % visés. Une salade verte à côté rétablit l'équilibre.`;
-  else              l = `<b>${lg} % de légumes</b> : nettement sous la cible. Prévois une belle salade, ou double les légumes de la recette.`;
-  if(gr >= 30) l += ` Les matières grasses ne pèsent presque rien sur la balance mais portent <b>${gr} % des calories</b> : c'est là qu'est la densité du plat.`;
-  s += `<p class="lecture">${l}</p>`;
-
-  return `<div class="mont">${s}</div>`;
-}
-
-
-/* --- recettes -------------------------------------------------- */
-function renderRecettes(){
-  $("recettes").innerHTML = DATA.jours.map((d,i)=>{
-    const o = d.opts[sel[i]];
-    const ing = o.ing.map(g=>
-      '<li>'+g[1]+'<span>'+(g[2] ? g[2]+(g[3]?' '+g[3]:'') : '—')+'</span></li>').join('');
-    return '<details class="bloc"><summary>'
-      + '<span class="idx">'+n2(i+1)+'</span><span class="ttl">'+o.n+'</span></summary>'
-      + '<div class="corps">'
-      + '<h4>Composition · 2 portions</h4><ul>'+ing+'</ul>'
-      + (o.k ? '<p class="nutri">≈ '+o.k+' kcal · '+o.pr+' g protéines par portion<br>'
-              +'Table Ciqual — ANSES · marge ±15 %</p>' : '')
-      + '<h4>Protocole — '+o.t+'</h4><ol>'+(o.et||[]).map(e=>'<li>'+e+'</li>').join('')+'</ol>'
-      + (o.rp ? '<h4>Répartition dans l\'assiette</h4>' + repartition(o.rp) : '')
-      + (o.tip ? '<div class="note"><b>À retenir</b>'+o.tip+'</div>' : '')
-      + '</div></details>';
-  }).join('');
-}
-
-/* --- gestes ---------------------------------------------------- */
 const GESTES = [
  ["Sécher ce qu'on veut faire dorer",
   "Une surface humide ne dore pas : l'eau doit d'abord s'évaporer, et pendant ce temps l'aliment cuit à la vapeur dans sa propre humidité. Passe systématiquement la viande, le poisson et même les légumes lavés au papier absorbant. C'est le geste le plus rentable de toute la cuisine : trente secondes d'effort pour la différence entre gris et doré."],
@@ -995,257 +764,505 @@ const GESTES = [
  ["Finir par quelque chose de cru",
   "Herbes ciselées, zeste, filet d'huile crue, oignon rouge, graines torréfiées. La cuisson aplatit les arômes volatils ; un élément cru ajouté au dernier moment les réintroduit et apporte un contraste de texture. C'est ce qui distingue un plat fini d'un plat simplement cuit."]
 ];
+
+/* ================================================================
+   POPOTE 4 — logique
+   ================================================================ */
+const VERSION = "4.0";
+const RAYONS = {LEG:"Fruits et légumes",BOU:"Boucherie",POI:"Poissonnerie",
+                CRE:"Crèmerie",EPI:"Épicerie",SUR:"Surgelés",PAI:"Boulangerie"};
+const ORDRE = ["LEG","BOU","POI","CRE","EPI","SUR","PAI"];
+const VERDICTS = [
+  ["encore","Encore","#46603F"], ["bien","Bien","#6E8A68"],
+  ["bof","Bof","#B07445"],       ["jamais","Jamais","#8A3E24"]
+];
+const LIB  = Object.assign(Object.fromEntries(VERDICTS.map(v=>[v[0],v[1]])), {non:"Non cuisiné"});
+const COUL = Object.assign(Object.fromEntries(VERDICTS.map(v=>[v[0],v[2]])), {non:"#8C8578"});
+const ROLES = { "LÉGUMES":"#46603F", "PROTÉINES":"#9C5A34", "FÉCULENTS":"#C9A24B",
+                "MATIÈRES GRASSES":"#8C8578", "ASSAISONNEMENT":"#B5AFA2" };
+const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* --- stockage --------------------------------------------------- */
+const Store = {
+  get(k,d){ try{ const v=localStorage.getItem("popote."+k); return v===null?d:JSON.parse(v); }
+            catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem("popote."+k,JSON.stringify(v)); return true; }
+            catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem("popote."+k); }catch(e){} }
+};
+
+/* --- état --------------------------------------------------------
+   faits : { "nom du plat": "date ISO de la cuisson" }
+   notes : { "nom du plat": { v: "encore|bien|bof|jamais", n: "raison" } }
+   La clé est le nom du plat, comme pour les notes : un plat cuisiné
+   reste cuisiné quel que soit le jour où il était suggéré. */
+let DATA  = Store.get("semaine", null) || DEFAUT;
+let sel   = Store.get("sel", null);
+let coche = Store.get("coche", null) || {};
+let notes = Store.get("notes", null) || {};
+let hist  = Store.get("hist",  null) || [];
+let faits = Store.get("faits", null) || {};
+if(!Array.isArray(sel) || sel.length !== DATA.jours.length) sel = DATA.jours.map(()=>0);
+
+/* migration 3.x : « Non cuisiné » était un verdict, c'est désormais
+   un état déduit — un plat est cuisiné ou ne l'est pas. */
+Object.keys(notes).forEach(k=>{ if(notes[k].v === "non"){ delete notes[k].v;
+  if(!notes[k].n) delete notes[k]; } });
+
+const ouvert = new Set();                 // plats cuisinés dont le verdict est déplié
+/* Un plat coché pendant cette ouverture de l'app reste à sa place et se
+   transforme sous ton doigt, comme dans Rappels : la question du verdict
+   apparaît là où tu regardes. Il ne rejoint « Déjà cuisinés » qu'à la
+   prochaine ouverture. */
+const recents = new Set();
+function save(){ Store.set("sel", sel); Store.set("coche", coche); Sync.envoyerBientot(); }
+
+/* --- utilitaires -------------------------------------------------- */
+const $   = id => document.getElementById(id);
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const plat = i => DATA.jours[i].opts[sel[i]];
+const minuscule = j => j.charAt(0).toLowerCase() + j.slice(1);
+const jourDe = iso => new Date(iso).toLocaleDateString('fr-FR', {weekday:'long'});
+const pluriel = (n, s, p) => n + ' ' + (n > 1 ? (p || s + 's') : s);
+
+/* « COURGETTE 34 % + GNOCCHI 34 % » devient « Courgette 34 % · Gnocchi 34 % » :
+   la même information, lisible. */
+function formule(f){
+  if(!f) return '';
+  return f.split(/\s*\+\s*/).map(x=>{
+    const t = x.trim().toLowerCase()
+               .replace(/\s+(\d+)\s*%$/, '\u00a0$1\u00a0%');   // « 22 % » ne se coupe jamais
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }).join(' · ');
+}
+
+let ft;
+function flash(m){
+  const f = $("flash"); f.textContent = m; f.classList.add('on');
+  clearTimeout(ft); ft = setTimeout(()=>f.classList.remove('on'), 2200);
+}
+function transition(fn){
+  if(document.startViewTransition && !reduit && document.visibilityState === 'visible'){
+    try{ document.startViewTransition(fn); return; }catch(e){}
+  }
+  fn();
+}
+
+/* ================================================================
+   SEMAINE
+   ================================================================ */
+function anneau(part){
+  const r = 26, c = 2*Math.PI*r;
+  return `<svg class="anneau" viewBox="0 0 62 62" aria-hidden="true">
+    <circle class="piste" cx="31" cy="31" r="${r}"/>
+    <circle class="val" cx="31" cy="31" r="${r}" stroke-dasharray="${c.toFixed(1)}"
+            stroke-dashoffset="${(c*(1-part)).toFixed(1)}"/></svg>`;
+}
+
+function renderSemaine(){
+  const n = DATA.jours.length;
+  const idx = DATA.jours.map((d,i)=>i);
+  const reste = idx.filter(i=>!faits[plat(i).n]);
+  const fait  = idx.filter(i=> faits[plat(i).n]);
+  const haut  = idx.filter(i=>!faits[plat(i).n] || recents.has(plat(i).n));
+  const bas   = fait.filter(i=>!recents.has(plat(i).n))
+                    .sort((a,b)=> faits[plat(b).n].localeCompare(faits[plat(a).n]));
+
+  const prix = idx.reduce((s,i)=>s+(plat(i).p||0),0);
+  const ks = idx.map(i=>plat(i).k).filter(Boolean);
+  const moy = ks.length ? Math.round(ks.reduce((a,b)=>a+b,0)/ks.length/10)*10 : 0;
+  $("spec").textContent = (DATA.semaine||'') + ' · 2 personnes';
+
+  $("progresSemaine").innerHTML = '<div class="progres">' + anneau(fait.length/n)
+    + '<div><div class="grand">' + (fait.length === n ? 'Semaine bouclée'
+          : fait.length + ' sur ' + n + ' cuisinés') + '</div>'
+    + '<div class="petit">' + (fait.length === n
+          ? 'Pense au bilan dimanche'
+          : 'Reste ' + pluriel(reste.length, 'dîner') + ' · ' + prix + ' € · ≈ ' + moy + ' kcal')
+    + '</div></div></div>';
+
+  $("nAFaire").textContent = reste.length ? reste.length + ' à cuisiner' : '';
+  $("aFaire").innerHTML = haut.length
+    ? haut.map(i => faits[plat(i).n] ? carteFaite(i) : carteAFaire(i)).join('')
+    : '<div class="carte vide">Tout est cuisiné. Le menu de la semaine prochaine arrive dimanche.</div>';
+  $("hFaits").style.display = bas.length ? '' : 'none';
+  const anoter = bas.filter(i=>!(notes[plat(i).n]||{}).v).length;
+  $("nFaits").textContent = anoter ? anoter + ' à noter' : '';
+  $("faits").innerHTML = bas.map(carteFaite).join('');
+
+  const veg = idx.filter(i=>(plat(i).tags||[]).some(t=>t[0]==='Végétarien')).length;
+  $("bilanSemaine").textContent = pluriel(veg, 'dîner végétarien', 'dîners végétariens')
+    + ' · sans four · 40 minutes maximum. Les jours sont des suggestions : cuisine dans l\'ordre qui t\'arrange.';
+}
+
+function carteAFaire(i){
+  const d = DATA.jours[i], o = plat(i), nb = d.opts.length;
+  const tags = (o.tags||[]).map(t=>`<span class="puce ${t[1]?'terre':'vert'}">${esc(t[0])}</span>`).join('');
+  return `<article class="carte plat" style="view-transition-name:plat${i}">
+    <div class="tete"><span class="jour">Suggéré ${minuscule(d.j)}</span><span class="duree">${esc(o.t||'')}</span></div>
+    <h3>${esc(o.n)}</h3>
+    <p class="formule">${esc(formule(o.f))}</p>
+    <div class="puces">
+      ${o.k?`<span class="puce">${o.k} kcal</span>`:''}${o.pr?`<span class="puce">${o.pr} g prot.</span>`:''}${o.p?`<span class="puce">${o.p} €</span>`:''}${tags}
+    </div>
+    ${o.w?`<p class="usage">${esc(o.w)}</p>`:''}
+    <div class="rangee">
+      <button class="bt plein" data-cuire="${i}">${CHECK.replace('stroke-width','stroke="currentColor" stroke-width')} Cuisiné</button>
+      ${nb>1?`<button class="bt" data-changer="${i}">Changer · ${sel[i]+1}/${nb}</button>`:''}
+    </div>
+  </article>`;
+}
+
+function carteFaite(i){
+  const o = plat(i), e = notes[o.n] || {};
+  const deplie = !e.v || ouvert.has(i);
+  return `<article class="carte plat fait" style="view-transition-name:plat${i}">
+    <div class="rang">
+      <button class="coche oui" data-cuire="${i}" aria-label="Remettre à cuisiner">${CHECK}</button>
+      <div class="titres" data-deplier="${i}" role="button" tabindex="0">
+        <h3>${esc(o.n)}</h3>
+        <div class="quand">Cuisiné ${jourDe(faits[o.n])}${e.n && !deplie ? ' · « '+esc(e.n)+' »' : ''}</div>
+      </div>
+      ${e.v && !deplie ? `<span class="verdict-puce" style="background:${COUL[e.v]}">${LIB[e.v]}</span>` : ''}
+    </div>
+    ${deplie ? `
+      <p class="question">${e.v ? 'Ton verdict' : 'Alors, verdict ?'}</p>
+      <div class="segment verdicts">
+        ${VERDICTS.map(v=>`<button data-verdict="${i}" data-v="${v[0]}" class="${e.v===v[0]?'on':''}">${v[1]}</button>`).join('')}
+      </div>
+      <input class="champ" data-note="${i}" maxlength="140" value="${esc(e.n||'')}"
+             placeholder="Un mot sur pourquoi ? (facultatif)">
+      ${e.v ? `<button class="lien-discret" data-deplier="${i}">Replier</button>` : ''}` : ''}
+  </article>`;
+}
+
+/* --- actions --------------------------------------------------- */
+function basculerCuisine(i){
+  const o = plat(i);
+  const cuit = !faits[o.n];
+  transition(()=>{
+    if(cuit){ faits[o.n] = new Date().toISOString(); ouvert.add(i); recents.add(o.n); }
+    else    { delete faits[o.n]; ouvert.delete(i); recents.delete(o.n); }
+    Store.set("faits", faits); Sync.envoyerBientot();
+    renderSemaine(); renderRecettes(); renderBilan();
+  });
+  flash(cuit ? 'Bon appétit' : 'Remis dans la liste');
+}
+
+function donnerVerdict(i, v){
+  const o = plat(i), e = notes[o.n] || {};
+  e.v = (e.v === v) ? undefined : v;             // retaper annule
+  if(!e.v && !e.n) delete notes[o.n]; else notes[o.n] = e;
+  ouvert.add(i);
+  Store.set("notes", notes); Sync.envoyerBientot();
+  renderSemaine(); renderBilan();
+  const champ = document.querySelector(`[data-note="${i}"]`);
+  if(champ && e.v && !e.n) champ.focus({preventScroll:true});
+}
+
+let tempoNote;
+function noterRaison(i, texte){
+  const o = plat(i), e = notes[o.n] || {};
+  e.n = texte.trim();
+  if(!e.v && !e.n) delete notes[o.n]; else notes[o.n] = e;
+  Store.set("notes", notes);
+  clearTimeout(tempoNote);
+  tempoNote = setTimeout(()=>{ Sync.envoyerBientot(); renderBilan(); }, 600);
+}
+
+function changerPlat(i){
+  transition(()=>{
+    sel[i] = (sel[i]+1) % DATA.jours[i].opts.length;
+    save(); renderSemaine(); renderCourses(); renderRecettes(); renderBilan();
+  });
+  flash('Liste de courses recalculée');
+}
+
+/* délégation : un seul écouteur pour tout l'onglet */
+$("p-semaine").addEventListener('click', ev=>{
+  const b = ev.target.closest('[data-cuire],[data-changer],[data-verdict],[data-deplier]');
+  if(!b) return;
+  if(b.dataset.cuire   !== undefined) return basculerCuisine(+b.dataset.cuire);
+  if(b.dataset.changer !== undefined) return changerPlat(+b.dataset.changer);
+  if(b.dataset.verdict !== undefined) return donnerVerdict(+b.dataset.verdict, b.dataset.v);
+  if(b.dataset.deplier !== undefined){
+    const i = +b.dataset.deplier;
+    if(ouvert.has(i)) ouvert.delete(i); else ouvert.add(i);
+    renderSemaine();
+  }
+});
+$("p-semaine").addEventListener('input', ev=>{
+  const c = ev.target.closest('[data-note]');
+  if(c) noterRaison(+c.dataset.note, c.value);
+});
+
+/* ================================================================
+   COURSES
+   ================================================================ */
+function renderCourses(){
+  const agg = {};
+  DATA.jours.forEach((d,i)=>plat(i).ing.forEach(g=>{
+    const [r,n,q,u,uniq] = g;
+    if(r === 'P') return;
+    const k = r+'|'+n+'|'+u;
+    if(!agg[k]) agg[k] = {r,n,q:0,u,uniq};
+    agg[k].q = uniq ? Math.max(agg[k].q,q) : agg[k].q + q;
+  }));
+  const parR = {};
+  Object.values(agg).forEach(it=>{ (parR[it.r] = parR[it.r]||[]).push(it); });
+
+  let h = '';
+  ORDRE.forEach(r=>{
+    if(!parR[r]) return;
+    h += `<p class="legende-liste">${RAYONS[r]||r}</p><div class="groupe">`;
+    parR[r].sort((a,b)=>a.n.localeCompare(b.n,'fr')).forEach(it=>{
+      const k = it.r+'-'+it.n;                     // clé inchangée depuis la v1 : la synchro en dépend
+      h += `<label class="ligne article"><input type="checkbox" data-k="${esc(k)}"${coche[k]?' checked':''}>`
+         + `<span class="rond">${CHECK}</span><span class="nom">${esc(it.n)}</span>`
+         + `<span class="val">${it.q ? it.q+(it.u?' '+esc(it.u):'') : ''}</span></label>`;
+    });
+    h += '</div>';
+  });
+  $("courses").innerHTML = h;
+  compte();
+}
+function compte(){
+  const b = [...document.querySelectorAll('#courses input')];
+  const f = b.filter(x=>x.checked).length;
+  $("cpt").textContent = f + ' sur ' + b.length;
+  $("prog").style.width = (b.length ? f/b.length*100 : 0) + '%';
+}
+$("courses").addEventListener('change', ev=>{
+  const b = ev.target.closest('input[data-k]');
+  if(!b) return;
+  if(b.checked) coche[b.dataset.k] = true; else delete coche[b.dataset.k];
+  save(); compte();
+  Sync.envoyerCoche(b.dataset.k, b.checked);
+});
+$("raz").addEventListener('click', ()=>{
+  const anciennes = Object.keys(coche);
+  if(!anciennes.length) return;
+  coche = {}; save(); renderCourses();
+  anciennes.forEach(k => Sync.envoyerCoche(k, false));
+  flash('Liste remise à zéro');
+});
+
+/* ================================================================
+   RECETTES
+   ================================================================ */
+function secteur(cx,cy,r,a0,a1){
+  const px = a => [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+  const [x0,y0] = px(a0), [x1,y1] = px(a1);
+  return `M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${(a1-a0)>Math.PI?1:0},1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`;
+}
+
+/* Deux lectures d'un même plat : ce qui remplit l'assiette (la masse,
+   en poids cuits) et d'où vient l'énergie (les calories). L'écart
+   entre les deux est l'information utile. */
+function repartition(rp){
+  const tg = rp.reduce((s,x)=>s+x[1],0) || 1, tk = rp.reduce((s,x)=>s+x[2],0) || 1;
+  const t = n => ROLES[n] || "#8C8578", cx = 110, cy = 66;
+  let s = '<svg viewBox="0 0 220 160" role="img" aria-label="Répartition en masse et en calories">'
+        + `<circle class="plateau" cx="${cx}" cy="${cy}" r="60"/>`;
+  let a = -Math.PI/2;
+  rp.forEach(x=>{
+    const a2 = a + x[1]/tg*2*Math.PI;
+    s += `<path d="${secteur(cx,cy,52,a,a2)}" fill="${t(x[0])}"/>`;
+    s += `<path class="sep" d="M${cx},${cy} L${(cx+52*Math.cos(a)).toFixed(1)},${(cy+52*Math.sin(a)).toFixed(1)}"/>`;
+    a = a2;
+  });
+  s += '<text x="26" y="140" font-size="9" fill="currentColor" fill-opacity=".5">Énergie</text>';
+  s += '<clipPath id="arrondi"><rect x="26" y="145" width="168" height="10" rx="5"/></clipPath>';
+  let x0 = 26;
+  rp.forEach(v=>{ const w = v[2]/tk*168;
+    s += `<rect x="${x0.toFixed(1)}" y="145" width="${w.toFixed(1)}" height="10" fill="${t(v[0])}" clip-path="url(#arrondi)"/>`;
+    x0 += w; });
+  s += '</svg><ul class="leg">' + rp.map(x=>
+        `<li><span class="pastille" style="background:${t(x[0])}"></span>${x[0].charAt(0)+x[0].slice(1).toLowerCase()}`
+      + `<span class="v">${x[1]} g · ${x[2]} kcal · ${Math.round(x[2]/tk*100)} %</span></li>`).join('') + '</ul>';
+
+  const pm = n => { const e = rp.find(x=>x[0]===n); return e ? e[1]/tg*100 : 0; };
+  const pk = n => { const e = rp.find(x=>x[0]===n); return e ? e[2]/tk*100 : 0; };
+  const lg = Math.round(pm("LÉGUMES")), gr = Math.round(pk("MATIÈRES GRASSES"));
+  let l = lg >= 45 ? `<b>${lg} % de légumes</b> dans l'assiette : la moitié visée est tenue.`
+        : lg >= 30 ? `<b>${lg} % de légumes</b> pour 50 % visés. Une salade verte à côté rétablit l'équilibre.`
+        :            `<b>${lg} % de légumes</b>, nettement sous la cible. Prévois une belle salade.`;
+  if(gr >= 30) l += ` Les matières grasses pèsent peu mais portent <b>${gr} % des calories</b>.`;
+  return `<div class="repart">${s}<p class="lecture">${l}</p></div>`;
+}
+
+function renderRecettes(){
+  const ouverts = new Set([...document.querySelectorAll('#recettes details[open]')].map(d=>d.dataset.i));
+  $("recettes").innerHTML = DATA.jours.map((d,i)=>{
+    const o = plat(i), cuit = !!faits[o.n];
+    const ing = o.ing.map(g=>`<li>${esc(g[1])}<span>${g[2] ? g[2]+(g[3]?' '+esc(g[3]):'') : ''}</span></li>`).join('');
+    return `<details class="carte recette" data-i="${i}"${ouverts.has(String(i))?' open':''}>
+      <summary>
+        <span class="coche${cuit?' oui':''}" aria-hidden="true">${CHECK}</span>
+        <span class="titres"><b>${esc(o.n)}</b><span>${cuit ? 'Cuisiné '+jourDe(faits[o.n]) : 'Suggéré '+minuscule(d.j)} · ${esc(o.t||'')}</span></span>
+        <span class="chevron"></span>
+      </summary>
+      <div class="corps">
+        <h4>Pour deux</h4><ul class="compo">${ing}</ul>
+        ${o.k ? `<p class="nutri">≈ ${o.k} kcal et ${o.pr} g de protéines par portion · table Ciqual (ANSES), ±15 %</p>` : ''}
+        <h4>Préparation</h4><ol class="etapes">${(o.et||[]).map(e=>`<li>${esc(e)}</li>`).join('')}</ol>
+        ${o.tip ? `<div class="astuce"><b>À retenir</b>${esc(o.tip)}</div>` : ''}
+        ${o.rp ? `<h4>Dans l'assiette</h4>${repartition(o.rp)}` : ''}
+        <div class="bas-recette">
+          <button class="bt ${cuit?'':'plein'}" style="width:100%" data-cuire-r="${i}">
+            ${cuit ? 'Cuisiné · remettre dans la liste' : 'J\'ai cuisiné ce plat'}</button>
+        </div>
+      </div>
+    </details>`;
+  }).join('');
+}
+$("recettes").addEventListener('click', ev=>{
+  const b = ev.target.closest('[data-cuire-r]');
+  if(!b) return;
+  const i = +b.dataset.cuireR;
+  basculerCuisine(i);
+  if(faits[plat(i).n]) setTimeout(()=>{
+    ouvrirOnglet('semaine');
+    const c = document.querySelector(`#aFaire [style*="plat${i}"]`);
+    if(c) c.scrollIntoView({block:'center', behavior: reduit ? 'auto' : 'smooth'});
+  }, 450);
+});
+
+document.querySelectorAll('#segRecettes button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#segRecettes button').forEach(x=>x.classList.toggle('on', x===b));
+  $("vueRecettes").style.display = b.dataset.vue === 'recettes' ? '' : 'none';
+  $("vueGuide").style.display    = b.dataset.vue === 'guide'    ? '' : 'none';
+}));
+
 function renderGestes(){
   $("gestes").innerHTML = GESTES.map((g,i)=>
-    '<details class="bloc"><summary><span class="idx">'+n2(i+1)+'</span>'
-    + '<span class="ttl">'+g[0]+'</span></summary>'
-    + '<div class="corps"><p style="margin:0;font-size:15px;line-height:1.65">'+g[1]+'</p></div>'
-    + '</details>').join('');
+    `<details class="carte recette"><summary><span class="titres"><b>${esc(g[0])}</b></span><span class="chevron"></span></summary>`
+    + `<div class="corps"><p style="margin:0;font-size:16px;line-height:1.6">${esc(g[1])}</p></div></details>`).join('');
 }
 
-/* --- débrief, historique, palmarès -------------------------------
-   Trois vues d'une même matière : ce que tu as pensé des plats.
-   Le débrief porte sur la semaine en cours, l'historique conserve
-   les semaines archivées, le palmarès cumule tout.
-
-   Tout vit dans le stockage local. Rien ne part nulle part : c'est
-   le bouton « Copier le débrief » qui referme la boucle, en te
-   donnant un bloc de texte à me transmettre le dimanche.
-   ---------------------------------------------------------------- */
-const VERDICTS = [
-  ["encore","Encore","#46603F"], ["bien","Bien","#6E7B6A"],
-  ["bof","Bof","#9C5A34"],       ["jamais","Jamais","#7A3B22"],
-  ["non","Non cuisiné","#8C8578"]
-];
-const LIB = Object.fromEntries(VERDICTS.map(v=>[v[0],v[1]]));
-const COUL = Object.fromEntries(VERDICTS.map(v=>[v[0],v[2]]));
-
-const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-function platDuJour(i){ return DATA.jours[i].opts[sel[i]]; }
-
-/* --- la semaine en cours --------------------------------------- */
-function renderDebrief(){
-  $("debrief").innerHTML = DATA.jours.map((d,i)=>{
-    const o = platDuJour(i), e = notes[o.n] || {};
-    return '<div class="plat">'
-      + '<div class="ref"><b>Jour ' + n2(i+1) + '</b> ' + d.j + '</div>'
-      + '<p class="nom">' + esc(o.n) + '</p>'
-      + '<div class="verdicts">' + VERDICTS.map(v =>
-          `<button class="vd v-${v[0]}${e.v===v[0]?' on':''}" data-i="${i}" data-v="${v[0]}">`
-          + v[1] + '</button>').join('') + '</div>'
-      + `<input class="pourquoi" data-i="${i}" maxlength="140" `
-      + `placeholder="Pourquoi ? (facultatif)" value="${esc(e.n||'')}">`
-      + '</div>';
-  }).join('');
-
-  $("debrief").querySelectorAll('.vd').forEach(b => b.addEventListener('click', () => {
-    const o = platDuJour(+b.dataset.i);
-    const e = notes[o.n] || {};
-    e.v = (e.v === b.dataset.v) ? null : b.dataset.v;   // recliquer annule
-    if(!e.v && !e.n) delete notes[o.n]; else notes[o.n] = e;
-    Store.set("notes", notes);
-    renderDebrief(); renderPalmares();
-  }));
-
-  $("debrief").querySelectorAll('.pourquoi').forEach(inp => {
-    const enregistre = () => {
-      const o = platDuJour(+inp.dataset.i);
-      const e = notes[o.n] || {};
-      e.n = inp.value.trim();
-      if(!e.v && !e.n) delete notes[o.n]; else notes[o.n] = e;
-      Store.set("notes", notes);
-    };
-    inp.addEventListener('change', enregistre);
-    inp.addEventListener('blur', enregistre);
-  });
-
-  const remplis = DATA.jours.filter((d,i)=>(notes[platDuJour(i).n]||{}).v).length;
-  $("envoi").innerHTML =
-      `<p class="intro"><b>${remplis} plat${remplis>1?'s':''} sur ${DATA.jours.length}</b> `
-    + 'noté' + (remplis>1?'s':'') + '. Le bloc ci-dessous est ce que tu me transmets le dimanche : '
-    + 'c\'est lui qui fait que le menu suivant tient compte de cette semaine.</p>'
-    + '<div><button class="act" id="copier">Copier le débrief</button>'
-    + '<button class="act vide-b" id="versClaude">Copier et ouvrir Claude</button></div>'
-    + '<div class="msg" id="msgD"></div>';
-
-  $("copier").addEventListener('click', ()=> copierDebrief(false));
-  $("versClaude").addEventListener('click', ()=> copierDebrief(true));
-}
-
-/* --- le bloc de texte à me transmettre -------------------------- */
-function texteDebrief(){
-  let t = 'DÉBRIEF — ' + (DATA.semaine || 'semaine en cours') + '\n\n';
+/* ================================================================
+   BILAN
+   ================================================================ */
+function texteBilan(){
+  let t = 'BILAN — ' + (DATA.semaine || 'semaine en cours') + '\n\n';
+  let nf = 0;
   DATA.jours.forEach((d,i)=>{
-    const o = platDuJour(i), e = notes[o.n] || {};
-    t += d.j + ' — ' + o.n + ' — ' + (e.v ? LIB[e.v].toUpperCase() : 'PAS D\'AVIS') + '\n';
+    const o = plat(i), e = notes[o.n] || {}, f = faits[o.n];
+    if(f) nf++;
+    t += d.j + ' (suggéré) — ' + o.n + '\n    '
+       + (f ? 'cuisiné ' + jourDe(f) + ' — ' + (e.v ? LIB[e.v].toUpperCase() : 'pas de verdict')
+            : 'PAS CUISINÉ') + '\n';
     if(e.n) t += '    « ' + e.n + ' »\n';
   });
-  return t;
+  return t + '\n' + nf + ' plat' + (nf>1?'s':'') + ' cuisiné' + (nf>1?'s':'') + ' sur ' + DATA.jours.length + '.\n';
 }
 
-async function copierDebrief(ouvrir){
-  const t = texteDebrief();
-  let ok = false;
+async function copierBilan(ouvrir){
+  const t = texteBilan(); let ok = false;
   try{ await navigator.clipboard.writeText(t); ok = true; }catch(e){}
   const m = $("msgD");
-  if(ok){
-    m.textContent = "Débrief copié." + (ouvrir ? " Colle-le dans la conversation." : "");
-    m.className = 'msg ok';
-  }else{
-    m.innerHTML = "Copie impossible sur ce navigateur. Sélectionne et copie ce texte :"
-                + '<textarea readonly style="margin-top:10px">' + esc(t) + '</textarea>';
-    m.className = 'msg ko';
-  }
-  setTimeout(()=>{ if(ok) m.className='msg'; }, 8000);
+  if(ok){ m.textContent = 'Bilan copié.' + (ouvrir ? ' Colle-le dans la conversation.' : ''); m.className = 'msg ok'; }
+  else  { m.innerHTML = 'Copie impossible. Sélectionne ce texte :<textarea class="champ" readonly>' + esc(t) + '</textarea>'; m.className = 'msg ko'; }
+  if(ok) setTimeout(()=>{ m.className = 'msg'; }, 6000);
   if(ouvrir) window.open('https://claude.ai/new', '_blank', 'noopener');
 }
 
-/* --- l'historique ----------------------------------------------- */
-function renderHistorique(){
-  if(!hist.length){
-    $("histo").innerHTML = '<p class="vide">Aucune semaine archivée pour l\'instant. '
-      + 'La première y entrera quand tu chargeras la semaine suivante.</p>';
-    return;
-  }
-  $("histo").innerHTML = hist.map((h,i)=>{
-    const notes_ = h.p.filter(x=>x.v).length;
-    return '<details class="bloc semaine-arc"><summary>'
-      + `<span class="idx">${n2(hist.length-i)}</span>`
-      + `<span class="ttl">${esc(h.s||'Semaine')}</span></summary>`
-      + '<div class="corps"><ul class="arc">'
-      + h.p.map(x =>
-          '<li><span>' + esc(x.n)
-          + (x.note ? '<span class="note">« ' + esc(x.note) + ' »</span>' : '')
-          + '</span>'
-          + (x.v ? `<span class="v" style="background:${COUL[x.v]}">${LIB[x.v]}</span>` : '')
-          + '</li>').join('')
-      + '</ul>'
-      + `<p class="nutri">${h.d || ''} · ${notes_} plat${notes_>1?'s':''} noté${notes_>1?'s':''}</p>`
-      + '</div></details>';
+function renderBilan(){
+  const n = DATA.jours.length;
+  const nf = DATA.jours.filter((d,i)=>faits[plat(i).n]).length;
+  const nv = DATA.jours.filter((d,i)=>(notes[plat(i).n]||{}).v).length;
+  $("envoi").innerHTML = `<div class="progres">${anneau(nf/n)}<div>
+      <div class="grand">${pluriel(nf,'cuisiné')} · ${pluriel(nv,'noté')}</div>
+      <div class="petit">sur ${n} dîners cette semaine</div></div></div>
+    <p class="usage">Le dimanche, copie ce bilan et colle-le-moi. C'est ce qui fait que le menu suivant tient compte de celui-ci.</p>
+    <div class="rangee"><button class="bt plein" id="copier">Copier le bilan</button>
+      <button class="bt teinte" id="versClaude">Copier et ouvrir Claude</button></div>
+    <div class="msg" id="msgD"></div>`;
+  $("copier").onclick = ()=>copierBilan(false);
+  $("versClaude").onclick = ()=>copierBilan(true);
+
+  $("recap").innerHTML = DATA.jours.map((d,i)=>{
+    const o = plat(i), e = notes[o.n] || {}, f = faits[o.n];
+    return `<div class="ligne"><span class="coche${f?' oui':''}" style="width:24px;height:24px">${CHECK}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:16px;line-height:1.3">${esc(o.n)}</div>
+      <div class="etat-plat">${f ? 'Cuisiné '+jourDe(f) : 'Pas encore cuisiné'}${e.n ? ' · « '+esc(e.n)+' »' : ''}</div></div>
+      ${e.v ? `<span class="verdict-puce" style="background:${COUL[e.v]}">${LIB[e.v]}</span>` : ''}</div>`;
   }).join('');
-}
 
-/* --- le palmarès ------------------------------------------------ */
-function renderPalmares(){
+  // palmarès : tous les verdicts, de toutes les semaines
   const cumul = {};
-  const ajoute = (nom, v) => {
-    if(!v) return;
-    (cumul[nom] = cumul[nom] || {})[v] = (cumul[nom][v] || 0) + 1;
-  };
+  const ajoute = (nom, v) => { if(!v || v === 'non') return;
+    (cumul[nom] = cumul[nom] || {})[v] = (cumul[nom][v] || 0) + 1; };
   hist.forEach(h => h.p.forEach(x => ajoute(x.n, x.v)));
-  Object.keys(notes).forEach(n => ajoute(n, notes[n].v));
-
+  Object.keys(notes).forEach(k => ajoute(k, notes[k].v));
   const noms = Object.keys(cumul);
-  if(!noms.length){
-    $("palmares").innerHTML = '<p class="vide">Rien à cumuler pour l\'instant. '
-      + 'Note tes plats de la semaine ci-dessus et le palmarès se remplira tout seul.</p>';
-    return;
-  }
-  const score = n => (cumul[n].encore||0)*3 + (cumul[n].bien||0)
-                   - (cumul[n].bof||0)*2 - (cumul[n].jamais||0)*4;
+  const score = k => (cumul[k].encore||0)*3 + (cumul[k].bien||0) - (cumul[k].bof||0)*2 - (cumul[k].jamais||0)*4;
   noms.sort((a,b)=> score(b)-score(a) || a.localeCompare(b,'fr'));
+  $("palmares").innerHTML = noms.length
+    ? '<div class="groupe">' + noms.map(k=>`<div class="ligne"><span style="font-size:16px;line-height:1.3">${esc(k)}</span>`
+        + '<span class="compteurs">' + VERDICTS.filter(v=>cumul[k][v[0]]).map(v=>
+            `<i style="background:${v[2]}" title="${v[1]}">${cumul[k][v[0]]}</i>`).join('') + '</span></div>').join('')
+      + '</div><p class="pied">Du plus apprécié au moins apprécié.</p>'
+    : '<div class="carte vide">Rien pour l\'instant. Coche un plat cuisiné et donne-lui un verdict : il apparaîtra ici.</div>';
 
-  $("palmares").innerHTML = '<ul class="arc">' + noms.map(n =>
-      '<li><span>' + esc(n) + '</span><span class="compteurs">'
-    + VERDICTS.filter(v=>cumul[n][v[0]]).map(v =>
-        `<i style="background:${v[2]}" title="${v[1]}">${cumul[n][v[0]]}</i>`).join('')
-    + '</span></li>').join('') + '</ul>'
-    + '<p class="nutri">Trié du plus apprécié au moins apprécié · '
-    + noms.length + ' plat' + (noms.length>1?'s':'') + ' jugé' + (noms.length>1?'s':'') + '</p>';
+  $("histo").innerHTML = hist.length ? hist.map((h,j)=>{
+    const nfa = h.p.filter(x=>x.fait).length;
+    return `<details class="carte recette semaine-arc"><summary><span class="titres"><b>${esc(h.s||'Semaine')}</b>`
+      + `<span>${esc(h.d||'')}${h.p.some(x=>'fait' in x) ? ' · '+nfa+' sur '+h.p.length+' cuisinés' : ''}</span></span>`
+      + '<span class="chevron"></span></summary><div class="corps"><div class="groupe">'
+      + h.p.map(x=>`<div class="ligne"><div style="flex:1;min-width:0"><div style="font-size:16px;line-height:1.3">${esc(x.n)}</div>`
+        + `${x.fait ? '<span class="note-arc" style="font-style:normal">Cuisiné '+esc(x.fait)+'</span>' : ''}`
+        + `${x.note ? '<span class="note-arc">« '+esc(x.note)+' »</span>' : ''}</div>`
+        + `${x.v ? `<span class="verdict-puce" style="background:${COUL[x.v]||'#8C8578'}">${LIB[x.v]||x.v}</span>` : ''}</div>`).join('')
+      + '</div></div></details>';
+  }).join('') : '<div class="carte vide">Aucune semaine archivée. La première y entrera quand tu chargeras la suivante.</div>';
 }
 
-/* --- archivage : appelé quand une nouvelle semaine arrive -------- */
+/* quand une nouvelle semaine arrive, l'ancienne rejoint l'historique */
 function archiver(){
-  const juges = DATA.jours.some((d,i)=>notes[platDuJour(i).n]);
-  if(!juges) return;                       // rien à garder
-  const stamp = new Date();
+  const touche = DATA.jours.some((d,i)=>notes[plat(i).n] || faits[plat(i).n]);
+  if(!touche) return;
   hist.unshift({
     s: DATA.semaine || '',
-    d: stamp.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}),
-    p: DATA.jours.map((d,i)=>{
-      const o = platDuJour(i), e = notes[o.n] || {};
-      return {n:o.n, v:e.v || null, note:e.n || ''};
-    })
+    d: new Date().toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}),
+    p: DATA.jours.map((d,i)=>{ const o = plat(i), e = notes[o.n] || {};
+      return {n:o.n, v:e.v || null, note:e.n || '', jour:d.j, fait: faits[o.n] ? jourDe(faits[o.n]) : null}; })
   });
-  hist = hist.slice(0, 40);                // on ne garde pas l'infini
+  hist = hist.slice(0, 40);
   Store.set("hist", hist);
 }
 
-
-function renderAll(){ renderMenu(); renderCourses(); renderRecettes(); renderGestes();
-                      renderDebrief(); renderHistorique(); renderPalmares(); }
-
-/* --- réglages --------------------------------------------------- */
+/* ================================================================
+   CHARGER UNE SEMAINE
+   Sur iPhone, l'app installée a son propre stockage, séparé de
+   Safari, et un lien tapé dans Messages ou dans Claude s'ouvre
+   toujours dans Safari. Un lien ne peut donc pas remplir l'app
+   installée. La voie fiable est le presse-papiers : on copie le
+   lien (ou le bloc, ou le lien de jumelage), on ouvre Popote, on
+   colle. Le bouton reconnaît tout seul ce qu'on lui donne.
+   ================================================================ */
 function dire(txt, ok){
   const m = $("msg"); m.textContent = txt; m.className = 'msg ' + (ok?'ok':'ko');
-  setTimeout(()=>{ m.className='msg'; }, 6000);
+  setTimeout(()=>{ m.className = 'msg'; }, 7000);
 }
-/* Validation : renvoie null si tout va bien, sinon le message d'erreur. */
 function valider(obj){
-  if(!obj || !Array.isArray(obj.jours) || !obj.jours.length)
-    return "Il manque la liste des jours.";
+  if(!obj || !Array.isArray(obj.jours) || !obj.jours.length) return "Il manque la liste des jours.";
   for(const d of obj.jours){
-    if(!d.j || !Array.isArray(d.opts) || !d.opts.length)
-      return "Un jour est mal formé : nom et options requis.";
-    for(const o of d.opts)
-      if(!o.n || !Array.isArray(o.ing))
-        return "Un plat est mal formé : nom et ingrédients requis.";
+    if(!d.j || !Array.isArray(d.opts) || !d.opts.length) return "Un jour est mal formé.";
+    for(const o of d.opts) if(!o.n || !Array.isArray(o.ing)) return "Un plat est mal formé.";
   }
   return null;
 }
-
 function appliquer(obj, msg){
-  archiver();                              // la semaine sortante rejoint l'historique
-  DATA = obj; sel = DATA.jours.map(()=>0); coche = {}; notes = {};
-  Store.set("notes", notes);
-  Store.set("semaine", DATA); save();
-  $("json").value = '';
+  archiver();
+  DATA = obj; sel = DATA.jours.map(()=>0); coche = {}; notes = {}; faits = {}; ouvert.clear();
+  Store.set("semaine", DATA); Store.set("notes", notes); Store.set("faits", faits); save();
   renderAll();
-  dire(msg || "Semaine chargée.", true);
-  document.querySelector('nav button[data-p="menu"]').click();
+  if(Sync.actif()) Sync.envoyerSemaine().catch(()=>{});
+  ouvrirOnglet('semaine');
+  flash(msg || 'Nouvelle semaine chargée');
 }
-
-function chargerTexte(raw, provenance){
-  raw = (raw||'').trim();
-  if(!raw) return dire("Rien à charger.", false);
-  let obj;
-  try{ obj = JSON.parse(raw); }
-  catch(e){ return dire("Bloc invalide : "+e.message, false); }
-  const err = valider(obj);
-  if(err) return dire(err, false);
-  appliquer(obj, provenance);
-}
-
-$("charger").addEventListener('click',()=> chargerTexte($("json").value));
-
-/* --- le presse-papiers ------------------------------------------
-   navigator.clipboard.readText() exige un geste de l'utilisateur et
-   déclenche une confirmation iOS. D'où le bouton plutôt qu'une
-   lecture automatique. */
-$("coller").addEventListener('click', async ()=>{
-  if(!navigator.clipboard || !navigator.clipboard.readText)
-    return dire("Ce navigateur ne donne pas accès au presse-papiers. Colle dans le champ.", false);
-  try{
-    const t = await navigator.clipboard.readText();
-    chargerTexte(t, "Semaine chargée depuis le presse-papiers.");
-  }catch(e){
-    dire("Accès au presse-papiers refusé. Colle dans le champ ci-dessous.", false);
-  }
-});
-
-$("claude").addEventListener('click',()=>{
-  window.open('https://claude.ai/new', '_blank', 'noopener');
-});
-
-/* --- chargement par lien ----------------------------------------
-   Le menu voyage dans le fragment (#w=…), jamais dans la requête :
-   un fragment n'est pas envoyé au serveur et n'est pas mis en cache
-   par le service worker.
-   Format : un caractère de tête ('z' = gzip, 'p' = brut) suivi du
-   JSON encodé en base64 sans padding, adapté aux URL.
-   ---------------------------------------------------------------- */
 function b64uDecode(str){
   const b = atob(str.replace(/-/g,'+').replace(/_/g,'/'));
   const u = new Uint8Array(b.length);
@@ -1255,71 +1272,299 @@ function b64uDecode(str){
 async function depaqueter(charge){
   const tag = charge[0], data = b64uDecode(charge.slice(1));
   if(tag === 'z'){
-    if(typeof DecompressionStream !== 'function')
-      throw new Error("Ce navigateur est trop ancien pour les liens compressés.");
+    if(typeof DecompressionStream !== 'function') throw new Error("navigateur trop ancien pour ce lien");
     const ds = new DecompressionStream('gzip');
     const w = ds.writable.getWriter(); w.write(data); w.close();
-    const buf = new Uint8Array(await new Response(ds.readable).arrayBuffer());
-    return JSON.parse(new TextDecoder().decode(buf));
+    return JSON.parse(new TextDecoder().decode(new Uint8Array(await new Response(ds.readable).arrayBuffer())));
   }
   if(tag === 'p') return JSON.parse(new TextDecoder().decode(data));
-  throw new Error("Lien d'un format inconnu.");
+  throw new Error("format de lien inconnu");
 }
-async function lireLien(){
-  const h = location.hash || '';
-  if(!h.startsWith('#w=')) return;
-  const charge = h.slice(3);
-  history.replaceState(null, '', location.pathname + location.search);
+
+/* le point d'entrée unique : un texte, quel qu'il soit */
+async function interpreter(texte){
+  const t = (texte || '').trim();
+  if(!t) return dire("Le presse-papiers est vide.", false);
+  const s = t.match(/#s=([A-Za-z0-9_-]+)/);
+  if(s) return rejoindre(s[1]);
+  const w = t.match(/#w=([A-Za-z0-9_-]+)/);
+  let obj;
   try{
-    const obj = await depaqueter(charge);
-    const err = valider(obj);
-    if(err){ dire(err, false); return; }
-    appliquer(obj, "Semaine chargée depuis le lien.");
-  }catch(e){
-    document.querySelector('nav button[data-p="reglages"]').click();
-    dire("Lien illisible : " + e.message, false);
-  }
+    if(w) obj = await depaqueter(w[1]);
+    else if(t.startsWith('{')) obj = JSON.parse(t);
+    else return dire("Le presse-papiers ne contient ni lien Popote ni semaine.", false);
+  }catch(e){ return dire("Impossible de lire ce contenu : " + e.message, false); }
+  const err = valider(obj);
+  if(err) return dire(err, false);
+  appliquer(obj, (obj.semaine ? obj.semaine.split('·')[0].trim() : 'Semaine') + ' chargée');
 }
-window.addEventListener('hashchange', lireLien);
-$("export").addEventListener('click',()=>{
-  const b = new Blob([JSON.stringify({semaine:DATA,sel,coche,notes,hist},null,2)],{type:'application/json'});
+
+$("coller").addEventListener('click', async ()=>{
+  if(!navigator.clipboard || !navigator.clipboard.readText)
+    return dire("Pas d'accès au presse-papiers ici : utilise la saisie à la main.", false);
+  try{ interpreter(await navigator.clipboard.readText()); }
+  catch(e){ dire("Accès au presse-papiers refusé. Utilise la saisie à la main.", false); }
+});
+$("manuel").addEventListener('click', ()=>{
+  const z = $("zoneManuelle"); z.style.display = z.style.display === 'none' ? '' : 'none';
+});
+$("charger").addEventListener('click', ()=> interpreter($("json").value));
+
+/* un lien ouvert directement (dans Safari, ou sur ordinateur) fonctionne
+   aussi ; si l'app est déjà ouverte, le navigateur ne recharge pas la page
+   et se contente d'émettre « hashchange », d'où l'écoute ci-dessous */
+async function lireFragment(){
+  const h = location.hash || '';
+  if(!/^#[sw]=/.test(h)) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  await interpreter(h);
+}
+window.addEventListener('hashchange', lireFragment);
+
+$("export").addEventListener('click', ()=>{
+  const b = new Blob([JSON.stringify({semaine:DATA,sel,coche,notes,hist,faits},null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b); a.download = 'popote-sauvegarde.json'; a.click();
   URL.revokeObjectURL(a.href); flash('Sauvegarde exportée');
 });
-$("effacer").addEventListener('click',()=>{
-  if(!confirm("Effacer la semaine, les substitutions et les cases cochées ?")) return;
-  Store.del("semaine"); Store.del("sel"); Store.del("coche");
-  Store.del("notes"); Store.del("hist");
-  DATA = DEFAUT; sel = DATA.jours.map(()=>0); coche = {}; notes = {}; hist = [];
-  renderAll(); flash('Remise à zéro effectuée');
+$("effacer").addEventListener('click', ()=>{
+  if(!confirm("Effacer la semaine, les plats cuisinés, les verdicts et l'historique de ce téléphone ?")) return;
+  ["semaine","sel","coche","notes","hist","faits"].forEach(k=>Store.del(k));
+  DATA = DEFAUT; sel = DATA.jours.map(()=>0); coche = {}; notes = {}; hist = []; faits = {};
+  renderAll(); flash('Tout est effacé');
 });
-$("raz").addEventListener('click',()=>{ coche = {}; save(); renderCourses(); });
 
-/* --- divers ------------------------------------------------------ */
-let ft;
-function flash(m){
-  const f = $("flash"); f.textContent = m; f.classList.add('on');
-  clearTimeout(ft); ft = setTimeout(()=>f.classList.remove('on'), 2000);
+/* ================================================================
+   SYNCHRONISATION — deux téléphones, une seule cuisine
+   Popote parle à Supabase en HTTP direct, sans bibliothèque : la
+   bibliothèque officielle se charge depuis un serveur distant, ce
+   qui casserait le mode hors ligne.
+
+   La semaine (menu, choix, plats cuisinés, verdicts, historique)
+   tient dans une ligne : le dernier qui écrit gagne. Les cases de
+   la liste de courses ont une ligne CHACUNE : à deux dans un
+   magasin, vous cochez en même temps, et un bloc unique ferait
+   perdre la coche de celui qui écrit en premier.
+
+   On interroge toutes les cinq secondes, seulement quand l'app est
+   à l'écran. Effet secondaire utile : le projet Supabase gratuit,
+   mis en pause après sept jours sans requête, reste éveillé.
+   ================================================================ */
+const Sync = {
+  minuterie: null, tempo: null, sale: false, etat: "inactive",
+
+  cfg(){ return Store.get("sync", null) || {}; },
+  actif(){ const c = this.cfg(); return !!(c.url && c.cle && c.foyer); },
+  entetes(extra){ const c = this.cfg();
+    return Object.assign({ apikey:c.cle, Authorization:"Bearer "+c.cle, "Content-Type":"application/json" }, extra||{}); },
+  base(){ return this.cfg().url.replace(/\/+$/,'') + "/rest/v1/"; },
+  charge(){ return { semaine:DATA, sel, notes, hist, faits }; },
+
+  async envoyerSemaine(){
+    if(!this.actif()) return;
+    const maj = new Date().toISOString();
+    const r = await fetch(this.base()+"popote_semaine", { method:"POST",
+      headers:this.entetes({Prefer:"resolution=merge-duplicates,return=minimal"}),
+      body:JSON.stringify({ foyer:this.cfg().foyer, etat:this.charge(), maj }) });
+    if(!r.ok) throw new Error("envoi " + r.status);
+    Store.set("majSemaine", maj); this.sale = false;
+  },
+  async lireSemaine(){
+    const r = await fetch(this.base()+"popote_semaine?foyer=eq."+encodeURIComponent(this.cfg().foyer)
+                          +"&select=etat,maj", { headers:this.entetes() });
+    if(!r.ok) throw new Error("lecture " + r.status);
+    const l = await r.json(); return l.length ? l[0] : null;
+  },
+  async envoyerCoche(cle, val){
+    if(!this.actif()) return;
+    try{ await fetch(this.base()+"popote_coche", { method:"POST",
+      headers:this.entetes({Prefer:"resolution=merge-duplicates,return=minimal"}),
+      body:JSON.stringify({ foyer:this.cfg().foyer, cle, coche:!!val, maj:new Date().toISOString() }) });
+    }catch(e){ /* hors ligne : rattrapé au prochain tour */ }
+  },
+  async lireCoches(){
+    const r = await fetch(this.base()+"popote_coche?foyer=eq."+encodeURIComponent(this.cfg().foyer)
+                          +"&select=cle,coche", { headers:this.entetes() });
+    if(!r.ok) throw new Error("cases " + r.status);
+    return r.json();
+  },
+
+  adopter(e, maj){
+    if(!e || !e.semaine || !Array.isArray(e.semaine.jours)) return false;
+    DATA = e.semaine;
+    sel  = Array.isArray(e.sel) && e.sel.length === DATA.jours.length ? e.sel : DATA.jours.map(()=>0);
+    notes = e.notes || {}; hist = e.hist || []; faits = e.faits || {};
+    ["semaine","sel","notes","hist","faits"].forEach(k=>Store.set(k, {semaine:DATA,sel,notes,hist,faits}[k]));
+    Store.set("majSemaine", maj);
+    return true;
+  },
+
+  async tour(){
+    if(!this.actif()) return;
+    try{
+      /* On n'adopte pas l'état distant si une modification locale attend
+         d'être envoyée, ni pendant que tu tapes : ce serait écraser ton
+         propre geste avec une version plus ancienne. */
+      const saisie = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+      if(!this.sale && !saisie){
+        const d = await this.lireSemaine(), loc = Store.get("majSemaine", null);
+        if(d && (!loc || d.maj > loc) && this.adopter(d.etat, d.maj)){
+          renderAll(); flash("Mis à jour depuis l'autre téléphone");
+        }
+      }
+      const lignes = await this.lireCoches();
+      let change = false;
+      lignes.forEach(l=>{
+        if(!!coche[l.cle] !== !!l.coche){ if(l.coche) coche[l.cle] = true; else delete coche[l.cle]; change = true; }
+      });
+      if(change){ Store.set("coche", coche); renderCourses(); }
+      this.statut("à jour");
+    }catch(e){ this.statut("hors ligne"); }
+  },
+  statut(t){ this.etat = t; const el = $("syncEtat"); if(el) el.textContent = t; },
+  demarrer(){
+    this.arreter(); if(!this.actif()) return;
+    this.tour();
+    this.minuterie = setInterval(()=>{ if(document.visibilityState === "visible") this.tour(); }, 5000);
+  },
+  arreter(){ if(this.minuterie) clearInterval(this.minuterie); this.minuterie = null; },
+  envoyerBientot(){
+    if(!this.actif()) return;
+    this.sale = true; clearTimeout(this.tempo);
+    this.tempo = setTimeout(()=>{ this.envoyerSemaine().catch(()=>this.statut("hors ligne")); }, 800);
+  }
+};
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible" && Sync.actif()) Sync.tour();
+});
+
+function codeFoyer(){
+  const a = new Uint8Array(16); crypto.getRandomValues(a);
+  return [...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,24);
 }
-document.querySelectorAll('nav button').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-    btn.classList.add('on');
-    $('p-'+btn.dataset.p).classList.add('on');
-    window.scrollTo(0,0);
-  });
-});
-$("ver").textContent = 'Popote — version ' + VERSION + ' · '
-  + (Store.set('t',1) ? 'mémoire active' : 'mémoire indisponible');
-Store.del('t');
+function lienJumelage(){
+  const charge = btoa(unescape(encodeURIComponent(JSON.stringify(Sync.cfg()))))
+                 .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  return location.origin + location.pathname + "#s=" + charge;
+}
 
+async function rejoindre(charge){
+  let j;
+  try{ j = JSON.parse(decodeURIComponent(escape(atob(charge.replace(/-/g,'+').replace(/_/g,'/'))))); }
+  catch(e){ ouvrirOnglet('reglages'); return dire("Lien de jumelage illisible.", false); }
+  if(!j.url || !j.cle || !j.foyer){ ouvrirOnglet('reglages'); return dire("Lien de jumelage incomplet.", false); }
+  if(!confirm("Rejoindre ce foyer ?\n\nLe menu, les plats cuisinés et la liste de courses de ce téléphone seront remplacés par ceux du foyer.")) return;
+  Store.set("sync", j); Store.set("majSemaine", null);
+  ouvrirOnglet('reglages');
+  try{
+    const d = await Sync.lireSemaine();
+    if(d) Sync.adopter(d.etat, d.maj);
+    coche = {}; Store.set("coche", coche);
+    renderAll(); Sync.demarrer(); flash('Foyer rejoint');
+  }catch(e){ renderSync(); dire("Foyer enregistré, mais le serveur ne répond pas pour l'instant.", false); Sync.demarrer(); }
+}
+
+function renderSync(){
+  const c = Sync.cfg(), branche = Sync.actif();
+  $("sync").innerHTML = branche
+    ? `<div class="groupe">
+         <div class="ligne">État<span class="val" id="syncEtat">${Sync.etat}</span></div>
+         <div class="ligne">Foyer<span class="val">${esc(c.foyer.slice(0,8))}…</span></div>
+         <div class="ligne">Projet<span class="val">${esc(c.url.replace(/^https?:\/\//,'').split('.')[0])}</span></div>
+         <button class="ligne bouton" id="jumeler">Copier le lien de jumelage</button>
+         <button class="ligne bouton danger" id="deconnecter">Déconnecter ce téléphone</button>
+       </div>
+       <p class="pied">Envoie le lien de jumelage à l'autre personne. Elle le copie, ouvre Popote, Réglages, « Coller depuis le presse-papiers ». Ce lien contient ta clé : traite-le comme un mot de passe.</p>
+       <div class="msg" id="msgS"></div>`
+    : `<div class="carte">
+         <p class="usage" style="margin-top:0">Deux téléphones, une seule liste : quand tu coches un produit, il se coche chez l'autre en quelques secondes. Les plats cuisinés et les verdicts suivent aussi.</p>
+         <input class="champ" id="sUrl" placeholder="https://xxxx.supabase.co" value="${esc(c.url||'')}" autocapitalize="off" autocorrect="off" spellcheck="false">
+         <input class="champ" id="sCle" placeholder="Clé publique (anon)" value="${esc(c.cle||'')}" autocapitalize="off" autocorrect="off" spellcheck="false">
+         <input class="champ" id="sFoyer" placeholder="Code du foyer" value="${esc(c.foyer||'')}" autocapitalize="off" autocorrect="off" spellcheck="false">
+         <div class="rangee"><button class="bt plein" id="connecter">Connecter</button>
+           <button class="bt" id="genererFoyer">Générer un code</button></div>
+         <div class="msg" id="msgS"></div>
+       </div>
+       <p class="pied">Pour rejoindre un foyer existant, colle simplement le lien de jumelage avec « Coller depuis le presse-papiers » plus haut.</p>`;
+
+  const ditS = (t, ok) => { const m = $("msgS"); m.textContent = t; m.className = "msg " + (ok?"ok":"ko"); };
+  if(branche){
+    $("jumeler").onclick = async ()=>{
+      const l = lienJumelage();
+      try{ await navigator.clipboard.writeText(l); ditS("Lien copié. Envoie-le à l'autre téléphone.", true); }
+      catch(e){ ditS("Copie impossible. Le voici : " + l, false); }
+    };
+    $("deconnecter").onclick = ()=>{
+      if(!confirm("Arrêter la synchronisation sur ce téléphone ? Tes données restent ici.")) return;
+      Sync.arreter(); Store.del("sync"); Store.del("majSemaine"); renderSync(); flash("Synchronisation arrêtée");
+    };
+  }else{
+    $("genererFoyer").onclick = ()=>{ $("sFoyer").value = codeFoyer(); ditS("Code créé : c'est lui qui relie vos deux téléphones.", true); };
+    $("connecter").onclick = async ()=>{
+      const url = $("sUrl").value.trim(), cle = $("sCle").value.trim();
+      let foyer = $("sFoyer").value.trim();
+      if(!/^https:\/\/.+/.test(url) && !/^http:\/\/localhost/.test(url)) return ditS("L'adresse doit commencer par https://", false);
+      if(cle.length < 20) return ditS("La clé publique semble incomplète.", false);
+      if(!foyer){ foyer = codeFoyer(); $("sFoyer").value = foyer; }
+      Store.set("sync", {url, cle, foyer});
+      ditS("Connexion…", true);
+      try{
+        const d = await Sync.lireSemaine();
+        if(d && d.etat && d.etat.semaine){
+          if(confirm("Une semaine existe déjà pour ce foyer.\n\nOK : récupérer celle du foyer (ce téléphone est remplacé).\nAnnuler : envoyer la tienne (l'autre téléphone est remplacé).")){
+            Sync.adopter(d.etat, d.maj);
+          }else{ await Sync.envoyerSemaine(); }
+        }else{ await Sync.envoyerSemaine(); }
+        Object.keys(coche).forEach(k => Sync.envoyerCoche(k, true));
+        renderAll(); Sync.demarrer(); flash("Synchronisation active");
+      }catch(e){
+        Store.del("sync"); renderSync();
+        ditS("Connexion impossible (" + e.message + "). Vérifie l'adresse, la clé, et que le script SQL a bien été exécuté.", false);
+      }
+    };
+  }
+}
+
+/* ================================================================
+   NAVIGATION
+   ================================================================ */
+function ouvrirOnglet(nom){
+  document.querySelectorAll('nav.onglets button').forEach(b=>{
+    const on = b.dataset.p === nom;
+    b.classList.toggle('on', on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on', p.id === 'p-'+nom));
+  window.scrollTo(0,0);
+  $("barre").classList.remove('visible');
+  $("barre").textContent = $('p-'+nom).dataset.titre;
+}
+document.querySelectorAll('nav.onglets button').forEach(b=>b.addEventListener('click', ()=>ouvrirOnglet(b.dataset.p)));
+
+/* la barre du haut n'apparaît que lorsque le grand titre a quitté l'écran,
+   exactement comme dans les apps d'Apple */
+if('IntersectionObserver' in window){
+  const obs = new IntersectionObserver(entrees=>{
+    entrees.forEach(e=>{ if(e.target.closest('.panel').classList.contains('on'))
+      $("barre").classList.toggle('visible', !e.isIntersecting); });
+  }, { rootMargin: '-40px 0px 0px 0px' });
+  document.querySelectorAll('h1.titre').forEach(h=>obs.observe(h));
+}
+
+/* ================================================================
+   DÉMARRAGE
+   ================================================================ */
+function renderAll(){ renderSemaine(); renderCourses(); renderRecettes(); renderGestes(); renderBilan(); renderSync(); }
+
+$("ver").textContent = 'Popote ' + VERSION + ' · ' + (Store.set('t',1) ? 'données enregistrées sur ce téléphone' : 'stockage indisponible');
+Store.del('t');
+$("barre").textContent = 'Cette semaine';
 renderAll();
-lireLien();
+lireFragment();
+if(Sync.actif()) Sync.demarrer();
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
 }
 </script>
 </body>
